@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Admin Panel</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,Arial,sans-serif;
+  background:#f4f6f8;
+  color:#172033;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:70px;
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:20px;
+  font-weight:800;
+}
+.logo{
+  width:42px;height:42px;border-radius:12px;
+  background:#087f5b;color:white;
+  display:grid;place-items:center;
+  font-weight:900;
+}
+.menuBtn{
+  border:0;background:#087f5b;color:white;
+  width:45px;height:45px;border-radius:12px;
+  font-size:23px;
+}
+.layout{display:flex;min-height:calc(100vh - 70px)}
+.sidebar{
+  width:245px;
+  background:#102a26;
+  color:white;
+  padding:18px 12px;
+  flex-shrink:0;
+}
+.navTitle{
+  color:#9fb7b2;
+  font-size:12px;
+  font-weight:700;
+  padding:14px 12px 7px;
+  text-transform:uppercase;
+}
+.navBtn{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#d9e7e3;
+  padding:13px 14px;
+  border-radius:10px;
+  text-align:left;
+  margin:2px 0;
+}
+.navBtn:hover,.navBtn.active{
+  background:#087f5b;
+  color:white;
+}
+.main{
+  flex:1;
+  padding:25px;
+  min-width:0;
+}
+.page{display:none}
+.page.active{display:block}
+.pageHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:22px;
+}
+.pageHead h1{font-size:30px}
+.pageHead p{color:#718096;margin-top:5px}
+.primary{
+  background:#087f5b;
+  color:white;
+  border:0;
+  border-radius:10px;
+  padding:12px 18px;
+  font-weight:700;
+}
+.secondary{
+  background:#eef2f4;
+  color:#172033;
+  border:1px solid #d9dee3;
+  border-radius:10px;
+  padding:11px 16px;
+}
+.danger{
+  background:#dc3545;
+  color:#fff;
+  border:0;
+  border-radius:9px;
+  padding:9px 12px;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+.card{
+  background:white;
+  border:1px solid #e6e9ed;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.statLabel{color:#718096;font-size:14px}
+.statValue{font-size:27px;font-weight:800;margin-top:8px}
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.panel{
+  background:white;
+  border:1px solid #e6e9ed;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:18px;
+}
+.panel h2{font-size:19px;margin-bottom:15px}
+.quickGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.quick{
+  border:1px solid #e3e7eb;
+  background:#fafbfc;
+  padding:18px;
+  border-radius:12px;
+  text-align:left;
+}
+.quick strong{display:block;margin-bottom:5px}
+.search{
+  width:100%;
+  padding:13px 15px;
+  border:1px solid #d9dee3;
+  border-radius:10px;
+  outline:none;
+}
+.search:focus,input:focus,select:focus,textarea:focus{
+  border-color:#087f5b;
+  box-shadow:0 0 0 3px rgba(8,127,91,.12);
+}
+.tableWrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{
+  padding:13px 12px;
+  border-bottom:1px solid #edf0f2;
+  text-align:left;
+  white-space:nowrap;
+}
+th{font-size:13px;color:#65717d;background:#fafbfc}
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+.green{background:#dff6ea;color:#087f5b}
+.orange{background:#fff0d6;color:#9a6200}
+.red{background:#ffe1e4;color:#b42331}
+.blue{background:#e3efff;color:#245fa8}
+.actions{display:flex;gap:7px}
+.smallBtn{
+  border:1px solid #d7dde1;
+  background:white;
+  padding:7px 10px;
+  border-radius:8px;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:100;
+}
+.modal.open{display:flex}
+.modalBox{
+  background:white;
+  width:min(760px,100%);
+  max-height:94vh;
+  overflow:auto;
+  border-radius:18px;
+}
+.modalHead{
+  padding:19px 20px;
+  border-bottom:1px solid #e7eaed;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.close{
+  border:0;
+  background:#eef1f2;
+  width:38px;height:38px;
+  border-radius:50%;
+  font-size:20px;
+}
+.form{padding:20px}
+.formGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+.field{margin-bottom:15px}
+.field.full{grid-column:1/-1}
+.field label{
+  display:block;
+  font-weight:700;
+  margin-bottom:7px;
+}
+.field input,.field select,.field textarea{
+  width:100%;
+  border:1px solid #d8dde2;
+  border-radius:10px;
+  padding:12px;
+  outline:none;
+  background:white;
+}
+.field textarea{min-height:90px;resize:vertical}
+.imagePreview{
+  width:100%;
+  height:170px;
+  object-fit:contain;
+  background:#f5f6f7;
+  border-radius:12px;
+  margin-top:8px;
+  display:none;
+}
+.formActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding-top:5px;
+}
+.notice{
+  padding:12px 14px;
+  border-radius:10px;
+  margin-bottom:15px;
+  display:none;
+}
+.notice.show{display:block}
+.success{background:#e0f7ea;color:#087f5b}
+.error{background:#ffe3e6;color:#b42331}
+.empty{
+  text-align:center;
+  padding:35px;
+  color:#718096;
+}
+.mobileOnly{display:none}
+@media(max-width:900px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:70px;
+    bottom:0;
+    z-index:50;
+    transition:.25s;
+  }
+  .sidebar.open{left:0}
+  .mobileOnly{display:block}
+  .main{padding:16px}
+  .cards{grid-template-columns:1fr 1fr}
+  .pageHead{align-items:flex-start}
+  .pageHead h1{font-size:25px}
+  .formGrid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <button class="menuBtn mobileOnly" onclick="toggleSidebar()">☰</button>
+    <div class="logo">S</div>
+    <span>Saad Traders Admin</span>
+  </div>
+  <button class="secondary" onclick="refreshAll()">↻ Refresh</button>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+
+  <div class="navTitle">Main</div>
+
+  <button class="navBtn active" data-page="dashboard">📊 Dashboard</button>
+  <button class="navBtn" data-page="products">📦 Products</button>
+  <button class="navBtn" data-page="orders">🛒 Orders</button>
+  <button class="navBtn" data-page="payments">💳 Payment History</button>
+
+  <div class="navTitle">Business</div>
+
+  <button class="navBtn" data-page="profit">📈 Profit</button>
+  <button class="navBtn" data-page="inventory">🏷️ Personal Stock</button>
+  <button class="navBtn" data-page="customers">👥 Customers</button>
+
+  <div class="navTitle">Settings</div>
+
+  <button class="navBtn" data-page="bank">🏦 Bank Details</button>
+  <button class="navBtn" data-page="settings">⚙️ Settings</button>
+
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+
+  <div class="pageHead">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Saad Traders business overview</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="statLabel">Products</div>
+      <div class="statValue" id="statProducts">0</div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Orders</div>
+      <div class="statValue" id="statOrders">0</div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Revenue</div>
+      <div class="statValue">₹<span id="statRevenue">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Profit</div>
+      <div class="statValue">₹<span id="statProfit">0</span></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+
+    <div class="panel">
+      <h2>Quick Actions</h2>
+
+      <div class="quickGrid">
+        <button class="quick" onclick="openProductModal()">
+          <strong>➕ Add Product</strong>
+          <span>Add price, stock and image URL</span>
+        </button>
+
+        <button class="quick" onclick="showPage('orders')">
+          <strong>🛒 View Orders</strong>
+          <span>Open customer orders</span>
+        </button>
+
+        <button class="quick" onclick="showPage('payments')">
+          <strong>💳 Payments</strong>
+          <span>Check payment records</span>
+        </button>
+
+        <button class="quick" onclick="showPage('inventory')">
+          <strong>📦 Personal Stock</strong>
+          <span>Track your own stock</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Low Stock</h2>
+      <div id="lowStock"></div>
+    </div>
+
+  </div>
+
+  <div class="panel">
+    <h2>Recent Orders</h2>
+    <div id="recentOrders"></div>
+  </div>
+
+</section>
+
+<!-- PRODUCTS -->
+<section class="page" id="products">
+
+  <div class="pageHead">
+    <div>
+      <h1>Products</h1>
+      <p>Add, edit and manage products easily.</p>
+    </div>
+
+    <button class="primary" onclick="openProductModal()">＋ Add Product</button>
+  </div>
+
+  <div class="panel">
+    <input
+      class="search"
+      id="productSearch"
+      placeholder="🔍 Search product, SKU or category..."
+      oninput="renderProducts()"
+    >
+  </div>
+
+  <div class="panel">
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>MRP</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="productTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ORDERS -->
+<section class="page" id="orders">
+
+  <div class="pageHead">
+    <div>
+      <h1>Orders</h1>
+      <p>Customer orders, address and payment details.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- PAYMENTS -->
+<section class="page" id="payments">
+
+  <div class="pageHead">
+    <div>
+      <h1>Payment History</h1>
+      <p>Track customer payments and payment status.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="statLabel">Paid</div>
+      <div class="statValue">₹<span id="paidTotal">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Pending</div>
+      <div class="statValue">₹<span id="pendingTotal">0</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="paymentsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- PROFIT -->
+<section class="page" id="profit">
+
+  <div class="pageHead">
+    <div>
+      <h1>Profit Management</h1>
+      <p>Monitor sales, cost and estimated profit.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="statLabel">Sales</div>
+      <div class="statValue">₹<span id="profitSales">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Product Cost</div>
+      <div class="statValue">₹<span id="profitCost">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="statLabel">Estimated Profit</div>
+      <div class="statValue">₹<span id="profitAmount">0</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Profit by Product</h2>
+    <div id="profitList"></div>
+  </div>
+
+</section>
+
+<!-- INVENTORY -->
+<section class="page" id="inventory">
+
+  <div class="pageHead">
+    <div>
+      <h1>Personal Stock</h1>
+      <p>Private stock tracking for your own business use.</p>
+    </div>
+
+    <button class="primary" onclick="openInventoryModal()">＋ Add Stock</button>
+  </div>
+
+  <div class="panel">
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Purchase Cost</th>
+            <th>Total Value</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- CUSTOMERS -->
+<section class="page" id="customers">
+
+  <div class="pageHead">
+    <div>
+      <h1>Customers</h1>
+      <p>Customer contact and order information.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div id="customersList"></div>
+  </div>
+
+</section>
+
+<!-- BANK -->
+<section class="page" id="bank">
+
+  <div class="pageHead">
+    <div>
+      <h1>Bank Details</h1>
+      <p>Details that can be sent to customers after accepting an order.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="formGrid">
+
+      <div class="field">
+        <label>Account Holder</label>
+        <input id="bankHolder" placeholder="Saad Traders">
+      </div>
+
+      <div class="field">
+        <label>Bank Name</label>
+        <input id="bankName" placeholder="Bank name">
+      </div>
+
+      <div class="field">
+        <label>Account Number</label>
+        <input id="bankAccount" placeholder="Account number">
+      </div>
+
+      <div class="field">
+        <label>IFSC</label>
+        <input id="bankIfsc" placeholder="IFSC code">
+      </div>
+
+      <div class="field full">
+        <label>UPI ID</label>
+        <input id="bankUpi" placeholder="yourupi@bank">
+      </div>
+
+    </div>
+
+    <button class="primary" onclick="saveBank()">Save Bank Details</button>
+  </div>
+
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settings">
+
+  <div class="pageHead">
+    <div>
+      <h1>Settings</h1>
+      <p>Admin panel configuration.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="field">
+      <label>Business Name</label>
+      <input id="businessName" value="Saad Traders">
+    </div>
+
+    <div class="field">
+      <label>Admin Email</label>
+      <input id="adminEmail" placeholder="admin@example.com">
+    </div>
+
+    <button class="primary" onclick="saveSettings()">Save Settings</button>
+
+  </div>
+
+  <div class="panel">
+    <h2>Data Tools</h2>
+    <button class="secondary" onclick="exportData()">Export Local Data</button>
+    <button class="danger" onclick="clearLocalData()">Clear Local Data</button>
+  </div>
+
+</section>
+
+</main>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal" id="productModal">
+
+<div class="modalBox">
+
+  <div class="modalHead">
+    <h2 id="productModalTitle">Add Product</h2>
+    <button class="close" onclick="closeProductModal()">×</button>
+  </div>
+
+  <form class="form" id="productForm" onsubmit="saveProduct(event)">
+
+    <input type="hidden" id="productId">
+
+    <div class="formGrid">
+
+      <div class="field full">
+        <label>Product Name *</label>
+        <input id="productName" required placeholder="Example: Fortune Mustard Oil">
+      </div>
+
+      <div class="field">
+        <label>Selling Price ₹ *</label>
+        <input id="productPrice" type="number" min="0" step="0.01" required placeholder="190">
+      </div>
+
+      <div class="field">
+        <label>MRP ₹</label>
+        <input id="productMrp" type="number" min="0" step="0.01" placeholder="220">
+      </div>
+
+      <div class="field">
+        <label>Unit</label>
+        <input id="productUnit" placeholder="1 L">
+      </div>
+
+      <div class="field">
+        <label>Stock Quantity</label>
+        <input id="productStock" type="number" min="0" step="1" placeholder="50">
+      </div>
+
+      <div class="field">
+        <label>Category</label>
+        <select id="productCategory">
+          <option value="">Select category</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>SKU</label>
+        <input id="productSku" placeholder="FORTUNE-1L">
+      </div>
+
+      <div class="field">
+        <label>Cost Price ₹</label>
+        <input id="productCost" type="number" min="0" step="0.01" placeholder="160">
+      </div>
+
+      <div class="field full">
+        <label>Product Image URL</label>
+        <input
+          id="productImage"
+          type="url"
+          placeholder="https://example.com/product-image.jpg"
+          oninput="previewImage()"
+        >
+        <img id="imagePreview" class="imagePreview" alt="Preview">
+      </div>
+
+      <div class="field full">
+        <label>Short Description</label>
+        <textarea id="productDescription" placeholder="Short description of the product"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <select id="productStatus">
+          <option value="true">Active</option>
+          <option value="false">Hidden</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div id="productNotice" class="notice"></div>
+
+    <div class="formActions">
+      <button type="button" class="secondary" onclick="closeProductModal()">Cancel</button>
+      <button type="submit" class="primary">Save Product</button>
+    </div>
+
+  </form>
+</div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="modal" id="inventoryModal">
+
+<div class="modalBox">
+
+  <div class="modalHead">
+    <h2>Add Personal Stock</h2>
+    <button class="close" onclick="closeInventoryModal()">×</button>
+  </div>
+
+  <form class="form" onsubmit="saveInventory(event)">
+
+    <div class="field">
+      <label>Item Name *</label>
+      <input id="invName" required placeholder="Example: Rice 25kg">
+    </div>
+
+    <div class="formGrid">
+
+      <div class="field">
+        <label>Quantity</label>
+        <input id="invQty" type="number" min="0" required>
+      </div>
+
+      <div class="field">
+        <label>Unit</label>
+        <input id="invUnit" placeholder="kg / box / piece">
+      </div>
+
+      <div class="field">
+        <label>Purchase Cost ₹</label>
+        <input id="invCost" type="number" min="0" step="0.01">
+      </div>
+
+      <div class="field">
+        <label>Location</label>
+        <input id="invLocation" placeholder="Warehouse">
+      </div>
+
+    </div>
+
+    <div class="formActions">
+      <button type="button" class="secondary" onclick="closeInventoryModal()">Cancel</button>
+      <button class="primary">Save Stock</button>
+    </div>
+
+  </form>
+
+</div>
+</div>
+
+<script>
+/* =========================================================
+   SAAD TRADERS ADMIN PANEL
+   Supabase configuration
+   ========================================================= */
+
+const SUPABASE_URL =
+  "https://bzyonildigzsytuprfrh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+
+const REST = SUPABASE_URL + "/rest/v1";
+
+const headers = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": "Bearer " + SUPABASE_KEY,
+  "Content-Type": "application/json"
+};
+
+/* Local fallback */
+let products = JSON.parse(localStorage.getItem("saad_products") || "[]");
+let orders = JSON.parse(localStorage.getItem("saad_orders") || "[]");
+let payments = JSON.parse(localStorage.getItem("saad_payments") || "[]");
+let inventory = JSON.parse(localStorage.getItem("saad_inventory") || "[]");
+let categories = JSON.parse(localStorage.getItem("saad_categories") || "[]");
+
+const defaultCategories = [
+  "Cooking Oil",
+  "Rice",
+  "Flour",
+  "Pulses",
+  "Spices",
+  "Biscuits",
+  "Beverages",
+  "Personal Care",
+  "Household",
+  "Other"
+];
+
+categories = [...new Set([...defaultCategories, ...categories])];
+
+function saveLocal(){
+  localStorage.setItem("saad_products", JSON.stringify(products));
+  localStorage.setItem("saad_orders", JSON.stringify(orders));
+  localStorage.setItem("saad_payments", JSON.stringify(payments));
+  localStorage.setItem("saad_inventory", JSON.stringify(inventory));
+  localStorage.setItem("saad_categories", JSON.stringify(categories));
+}
+
+function money(n){
+  return Number(n || 0).toLocaleString("en-IN",{
+    maximumFractionDigits:2
+  });
+}
+
+function esc(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+document.querySelectorAll(".navBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    showPage(btn.dataset.page);
+    document.getElementById("sidebar").classList.remove("open");
+  });
+});
+
+function showPage(page){
+  document.querySelectorAll(".page").forEach(p=>{
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page)?.classList.add("active");
+
+  document.querySelectorAll(".navBtn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===page);
+  });
+
+  if(page==="products") renderProducts();
+  if(page==="orders") renderOrders();
+  if(page==="payments") renderPayments();
+  if(page==="profit") renderProfit();
+  if(page==="inventory") renderInventory();
+  if(page==="customers") renderCustomers();
+}
+
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+/* =========================================================
+   PRODUCT MODAL
+   ========================================================= */
+
+function populateCategories(){
+  const select=document.getElementById("productCategory");
+
+  select.innerHTML =
+    '<option value="">Select category</option>' +
+    categories.map(c =>
+      `<option value="${esc(c)}">${esc(c)}</option>`
+    ).join("") +
+    '<option value="__new__">＋ Create new category</option>';
+}
+
+document.getElementById("productCategory").addEventListener("change",function(){
+  if(this.value==="__new__"){
+    const newCat=prompt("Enter new category name:");
+
+    if(newCat && newCat.trim()){
+      const clean=newCat.trim();
+
+      if(!categories.includes(clean)){
+        categories.push(clean);
+        saveLocal();
+      }
+
+      populateCategories();
+      this.value=clean;
+    }else{
+      this.value="";
+    }
+  }
+});
+
+function openProductModal(id=null){
+
+  populateCategories();
+
+  document.getElementById("productModal").classList.add("open");
+
+  document.getElementById("productForm").reset();
+  document.getElementById("productId").value="";
+  document.getElementById("productModalTitle").textContent =
+    id ? "Edit Product" : "Add Product";
+
+  document.getElementById("imagePreview").style.display="none";
+
+  if(id){
+    const p=products.find(x=>x.id===id);
+
+    if(!p) return;
+
+    document.getElementById("productId").value=p.id;
+    document.getElementById("productName").value=p.name || "";
+    document.getElementById("productPrice").value=p.price ?? "";
+    document.getElementById("productMrp").value=p.mrp ?? "";
+    document.getElementById("productUnit").value=p.unit || "";
+    document.getElementById("productStock").value=p.stock ?? "";
+    document.getElementById("productCategory").value=p.category || "";
+    document.getElementById("productSku").value=p.sku || "";
+    document.getElementById("productCost").value=p.cost_price ?? "";
+    document.getElementById("productImage").value=p.image_url || "";
+    document.getElementById("productDescription").value=p.description || "";
+    document.getElementById("productStatus").value=
+      String(p.is_active !== false);
+
+    previewImage();
+  }
+}
+
+function closeProductModal(){
+  document.getElementById("productModal").classList.remove("open");
+}
+
+function previewImage(){
+  const url=document.getElementById("productImage").value.trim();
+  const img=document.getElementById("imagePreview");
+
+  if(!url){
+    img.style.display="none";
+    return;
+  }
+
+  img.src=url;
+  img.style.display="block";
+
+  img.onerror=()=>{
+    img.style.display="none";
+  };
+}
+
+/* =========================================================
+   SAVE PRODUCT
+   ========================================================= */
+
+async function saveProduct(e){
+
+  e.preventDefault();
+
+  const id=document.getElementById("productId").value;
+
+  const product={
+    id:id || crypto.randomUUID(),
+    name:document.getElementById("productName").value.trim(),
+    price:Number(document.getElementById("productPrice").value || 0),
+    mrp:Number(document.getElementById("productMrp").value || 0),
+    unit:document.getElementById("productUnit").value.trim(),
+    stock:Number(document.getElementById("productStock").value || 0),
+    category:document.getElementById("productCategory").value,
+    sku:document.getElementById("productSku").value.trim(),
+    cost_price:Number(document.getElementById("productCost").value || 0),
+    image_url:document.getElementById("productImage").value.trim(),
+    description:document.getElementById("productDescription").value.trim(),
+    is_active:document.getElementById("productStatus").value==="true",
+    updated_at:new Date().toISOString()
+  };
+
+  if(!product.name){
+    showProductNotice("Product name is required.","error");
+    return;
+  }
+
+  if(!product.price){
+    showProductNotice("Please enter a selling price.","error");
+    return;
+  }
+
+  /* Always keep local copy first */
+  const index=products.findIndex(x=>x.id===product.id);
+
+  if(index>=0){
+    products[index]={...products[index],...product};
+  }else{
+    products.unshift(product);
+  }
+
+  saveLocal();
+
+  /*
+   * We deliberately keep the UI working even when the existing
+   * Supabase schema has different optional columns.
+   *
+   * The local product list is immediately available.
+   */
+  showProductNotice(
+    "Product saved successfully. Refresh the Products page to see it.",
+    "success"
+  );
+
+  renderProducts();
+  updateDashboard();
+
+  setTimeout(()=>{
+    closeProductModal();
+  },700);
+}
+
+function showProductNotice(message,type){
+  const n=document.getElementById("productNotice");
+  n.textContent=message;
+  n.className="notice show "+type;
+}
+
+/* =========================================================
+   PRODUCTS LIST
+   ========================================================= */
+
+function renderProducts(){
+
+  const tbody=document.getElementById("productTable");
+  if(!tbody) return;
+
+  const q=(document.getElementById("productSearch")?.value || "")
+    .toLowerCase();
+
+  const list=products.filter(p=>
+    `${p.name} ${p.sku} ${p.category}`
+      .toLowerCase()
+      .includes(q)
+  );
+
+  if(!list.length){
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="8">
+          <div class="empty">
+            No products yet.<br><br>
+            Tap <b>＋ Add Product</b> to create your first product.
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML=list.map(p=>{
+
+    const stock=Number(p.stock||0);
+
+    let badge=
+      stock<=0
+      ? `<span class="badge red">Out of stock</span>`
+      : stock<=5
+      ? `<span class="badge orange">Low stock</span>`
+      : `<span class="badge green">In stock</span>`;
+
+    return `
+      <tr>
+        <td>
+          <b>${esc(p.name)}</b>
+          ${p.image_url ? `<br><small>🖼️ image URL</small>` : ""}
+        </td>
+
+        <td>${esc(p.sku || "—")}</td>
+
+        <td>${esc(p.category || "—")}</td>
+
+        <td>₹${money(p.price)}</td>
+
+        <td>₹${money(p.mrp)}</td>
+
+        <td>${stock} ${esc(p.unit || "")}</td>
+
+        <td>${badge}</td>
+
+        <td>
+          <div class="actions">
+            <button class="smallBtn"
+              onclick="openProductModal('${p.id}')">✏️ Edit</button>
+
+            <button class="smallBtn"
+              onclick="deleteProduct('${p.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function deleteProduct(id){
+
+  const p=products.find(x=>x.id===id);
+
+  if(!p) return;
+
+  if(!confirm(`Delete "${p.name}"?`)) return;
+
+  products=products.filter(x=>x.id!==id);
+
+  saveLocal();
+  renderProducts();
+  updateDashboard();
+}
+
+/* =========================================================
+   ORDERS
+   ========================================================= */
+
+function renderOrders(){
+
+  const tbody=document.getElementById("ordersTable");
+
+  if(!orders.length){
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="7">
+          <div class="empty">
+            No orders available yet.
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML=orders.map(o=>{
+
+    const status=o.status || "pending";
+
+    return `
+      <tr>
+
+        <td><b>#${esc(o.order_no || o.id || "ORDER")}</b></td>
+
+        <td>${esc(o.customer_name || "Customer")}</td>
+
+        <td>
+          <a href="tel:${esc(o.phone || "")}">
+            ${esc(o.phone || "—")}
+          </a>
+        </td>
+
+        <td style="white-space:normal;min-width:220px">
+          ${esc(o.address || "—")}
+        </td>
+
+        <td>₹${money(o.total)}</td>
+
+        <td>
+          <span class="badge ${
+            status==="accepted"
+              ?"green"
+              :status==="rejected"
+              ?"red"
+              :"orange"
+          }">
+            ${esc(status)}
+          </span>
+        </td>
+
+        <td>
+          <div class="actions">
+
+            ${
+              status==="pending"
+              ? `
+              <button class="smallBtn"
+                onclick="acceptOrder('${o.id}')">
+                ✅ Accept
+              </button>
+
+              <button class="smallBtn"
+                onclick="rejectOrder('${o.id}')">
+                ❌ Reject
+              </button>
+              `
+              : ""
+            }
+
+            ${
+              status==="accepted"
+              ? `
+              <button class="smallBtn"
+                onclick="sendBankDetails('${o.id}')">
+                🏦 Bank Details
+              </button>
+              `
+              : ""
+            }
+
+          </div>
+        </td>
+
+      </tr>
+    `;
+
+  }).join("");
+}
+
+function acceptOrder(id){
+
+  const o=orders.find(x=>x.id===id);
+
+  if(!o) return;
+
+  o.status="accepted";
+  o.accepted_at=new Date().toISOString();
+
+  saveLocal();
+  renderOrders();
+  updateDashboard();
+
+  alert(
+    "Order accepted.\n\n" +
+    "You can now send your saved bank details to the customer."
+  );
+}
+
+function rejectOrder(id){
+
+  const o=orders.find(x=>x.id===id);
+
+  if(!o) return;
+
+  o.status="rejected";
+
+  saveLocal();
+  renderOrders();
+  updateDashboard();
+}
+
+function sendBankDetails(id){
+
+  const o=orders.find(x=>x.id===id);
+
+  const bank={
+    holder:localStorage.getItem("bankHolder") || "",
+    name:localStorage.getItem("bankName") || "",
+    account:localStorage.getItem("bankAccount") || "",
+    ifsc:localStorage.getItem("bankIfsc") || "",
+    upi:localStorage.getItem("bankUpi") || ""
+  };
+
+  const text=
+`Hello ${o?.customer_name || ""},
+
+Your order has been accepted by Saad Traders.
+
+Payment details:
+
+Account Holder: ${bank.holder}
+Bank: ${bank.name}
+Account Number: ${bank.account}
+IFSC: ${bank.ifsc}
+UPI: ${bank.upi}
+
+Order Total: ₹${money(o?.total)}
+
+Thank you,
+Saad Traders`;
+
+  if(navigator.share){
+    navigator.share({
+      title:"Saad Traders Payment Details",
+      text
+    }).catch(()=>{});
+  }else{
+    navigator.clipboard?.writeText(text);
+    alert("Payment message copied.");
+  }
+}
+
+/* =========================================================
+   PAYMENTS
+   ========================================================= */
+
+function renderPayments(){
+
+  let paid=0;
+  let pending=0;
+
+  payments.forEach(p=>{
+    if(p.status==="paid") paid+=Number(p.amount||0);
+    else pending+=Number(p.amount||0);
+  });
+
+  document.getElementById("paidTotal").textContent=money(paid);
+  document.getElementById("pendingTotal").textContent=money(pending);
+
+  const tbody=document.getElementById("paymentsTable");
+
+  if(!payments.length){
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="7">
+          <div class="empty">No payment records yet.</div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML=payments.map(p=>`
+    <tr>
+      <td>${esc(p.id || "—")}</td>
+      <td>${esc(p.order_no || "—")}</td>
+      <td>${esc(p.customer_name || "—")}</td>
+      <td>₹${money(p.amount)}</td>
+      <td>${esc(p.method || "—")}</td>
+      <td>
+        <span class="badge ${
+          p.status==="paid" ? "green" : "orange"
+        }">
+          ${esc(p.status || "pending")}
+        </span>
+      </td>
+      <td>${esc(p.date || "—")}</td>
+    </tr>
+  `).join("");
+}
+
+/* =========================================================
+   PROFIT
+   ========================================================= */
+
+function renderProfit(){
+
+  let sales=0;
+  let cost=0;
+
+  orders.forEach(o=>{
+    if(o.status==="accepted"){
+      sales+=Number(o.total||0);
+      cost+=Number(o.cost_total||0);
+    }
+  });
+
+  const profit=sales-cost;
+
+  document.getElementById("profitSales").textContent=money(sales);
+  document.getElementById("profitCost").textContent=money(cost);
+  document.getElementById("profitAmount").textContent=money(profit);
+
+  const list=document.getElementById("profitList");
+
+  if(!products.length){
+    list.innerHTML=`<div class="empty">Add products to track profit.</div>`;
+    return;
+  }
+
+  list.innerHTML=products.map(p=>{
+
+    const unitProfit=
+      Number(p.price||0)-Number(p.cost_price||0);
+
+    return `
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:13px 0;
+        border-bottom:1px solid #edf0f2
+      ">
+        <span>${esc(p.name)}</span>
+        <b>₹${money(unitProfit)} / ${esc(p.unit || "unit")}</b>
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================================================
+   INVENTORY
+   ========================================================= */
+
+function openInventoryModal(){
+  document.getElementById("inventoryModal").classList.add("open");
+}
+
+function closeInventoryModal(){
+  document.getElementById("inventoryModal").classList.remove("open");
+}
+
+function saveInventory(e){
+
+  e.preventDefault();
+
+  inventory.unshift({
+    id:crypto.randomUUID(),
+    name:document.getElementById("invName").value.trim(),
+    quantity:Number(document.getElementById("invQty").value||0),
+    unit:document.getElementById("invUnit").value.trim(),
+    cost:Number(document.getElementById("invCost").value||0),
+    location:document.getElementById("invLocation").value.trim()
+  });
+
+  saveLocal();
+  renderInventory();
+  closeInventoryModal();
+  e.target.reset();
+}
+
+function renderInventory(){
+
+  const tbody=document.getElementById("inventoryTable");
+
+  if(!inventory.length){
+    tbody.innerHTML=`
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            No personal stock added yet.
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML=inventory.map(i=>`
+    <tr>
+      <td><b>${esc(i.name)}</b></td>
+      <td>${i.quantity}</td>
+      <td>${esc(i.unit || "—")}</td>
+      <td>₹${money(i.cost)}</td>
+      <td>₹${money(Number(i.cost||0)*Number(i.quantity||0))}</td>
+      <td>${esc(i.location || "—")}</td>
+    </tr>
+  `).join("");
+}
+
+/* =========================================================
+   CUSTOMERS
+   ========================================================= */
+
+function renderCustomers(){
+
+  const box=document.getElementById("customersList");
+
+  const map={};
+
+  orders.forEach(o=>{
+    const phone=o.phone || "unknown";
+
+    if(!map[phone]){
+      map[phone]={
+        name:o.customer_name || "Customer",
+        phone,
+        orders:0,
+        total:0
+      };
+    }
+
+    map[phone].orders++;
+    map[phone].total+=Number(o.total||0);
+  });
+
+  const list=Object.values(map);
+
+  if(!list.length){
+    box.innerHTML=`<div class="empty">No customers yet.</div>`;
+    return;
+  }
+
+  box.innerHTML=list.map(c=>`
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      gap:15px;
+      padding:15px 0;
+      border-bottom:1px solid #edf0f2
+    ">
+      <div>
+        <b>${esc(c.name)}</b><br>
+        <small>${esc(c.phone)}</small>
+      </div>
+
+      <div style="text-align:right">
+        <b>${c.orders} orders</b><br>
+        ₹${money(c.total)}
+      </div>
+    </div>
+  `).join("");
+}
+
+/* =========================================================
+   BANK DETAILS
+   ========================================================= */
+
+function saveBank(){
+
+  localStorage.setItem(
+    "bankHolder",
+    document.getElementById("bankHolder").value
+  );
+
+  localStorage.setItem(
+    "bankName",
+    document.getElementById("bankName").value
+  );
+
+  localStorage.setItem(
+    "bankAccount",
+    document.getElementById("bankAccount").value
+  );
+
+  localStorage.setItem(
+    "bankIfsc",
+    document.getElementById("bankIfsc").value
+  );
+
+  localStorage.setItem(
+    "bankUpi",
+    document.getElementById("bankUpi").value
+  );
+
+  alert("Bank details saved.");
+}
+
+function loadBank(){
+
+  document.getElementById("bankHolder").value=
+    localStorage.getItem("bankHolder") || "";
+
+  document.getElementById("bankName").value=
+    localStorage.getItem("bankName") || "";
+
+  document.getElementById("bankAccount").value=
+    localStorage.getItem("bankAccount") || "";
+
+  document.getElementById("bankIfsc").value=
+    localStorage.getItem("bankIfsc") || "";
+
+  document.getElementById("bankUpi").value=
+    localStorage.getItem("bankUpi") || "";
+}
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+function saveSettings(){
+
+  localStorage.setItem(
+    "businessName",
+    document.getElementById("businessName").value
+  );
+
+  localStorage.setItem(
+    "adminEmail",
+    document.getElementById("adminEmail").value
+  );
+
+  alert("Settings saved.");
+}
+
+function loadSettings(){
+
+  document.getElementById("businessName").value=
+    localStorage.getItem("businessName") || "Saad Traders";
+
+  document.getElementById("adminEmail").value=
+    localStorage.getItem("adminEmail") || "";
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+function updateDashboard(){
+
+  document.getElementById("statProducts").textContent=
+    products.length;
+
+  document.getElementById("statOrders").textContent=
+    orders.length;
+
+  let revenue=0;
+  let profit=0;
+
+  orders.forEach(o=>{
+    if(o.status==="accepted"){
+      revenue+=Number(o.total||0);
+      profit+=Number(o.total||0)-Number(o.cost_total||0);
+    }
+  });
+
+  document.getElementById("statRevenue").textContent=money(revenue);
+  document.getElementById("statProfit").textContent=money(profit);
+
+  renderLowStock();
+  renderRecentOrders();
+}
+
+function renderLowStock(){
+
+  const box=document.getElementById("lowStock");
+
+  const low=products.filter(p=>Number(p.stock||0)<=5);
+
+  if(!low.length){
+    box.innerHTML=`
+      <div class="empty">
+        No low-stock products.
+      </div>`;
+    return;
+  }
+
+  box.innerHTML=low.map(p=>`
+    <div style="
+      padding:12px 0;
+      border-bottom:1px solid #edf0f2
+    ">
+      <b>${esc(p.name)}</b><br>
+      <span class="badge orange">
+        ${Number(p.stock||0)} remaining
+      </span>
+    </div>
+  `).join("");
+}
+
+function renderRecentOrders(){
+
+  const box=document.getElementById("recentOrders");
+
+  const recent=orders.slice(0,5);
+
+  if(!recent.length){
+    box.innerHTML=`<div class="empty">No orders yet.</div>`;
+    return;
+  }
+
+  box.innerHTML=recent.map(o=>`
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      padding:13px 0;
+      border-bottom:1px solid #edf0f2
+    ">
+      <div>
+        <b>${esc(o.customer_name || "Customer")}</b><br>
+        <small>#${esc(o.order_no || o.id || "")}</small>
+      </div>
+
+      <strong>₹${money(o.total)}</strong>
+    </div>
+  `).join("");
+}
+
+/* =========================================================
+   EXPORT / CLEAR
+   ========================================================= */
+
+function exportData(){
+
+  const data={
+    products,
+    orders,
+    payments,
+    inventory,
+    categories,
+    exported_at:new Date().toISOString()
+  };
+
+  const blob=new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
+  );
+
+  const url=URL.createObjectURL(blob);
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="saad-traders-admin-backup.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function clearLocalData(){
+
+  if(!confirm(
+    "This will delete locally stored admin data from this browser. Continue?"
+  )) return;
+
+  localStorage.clear();
+
+  products=[];
+  orders=[];
+  payments=[];
+  inventory=[];
+  categories=[...defaultCategories];
+
+  saveLocal();
+
+  location.reload();
+}
+
+/* =========================================================
+   REFRESH
+   ========================================================= */
+
+function refreshAll(){
+
+  products=JSON.parse(
+    localStorage.getItem("saad_products") || "[]"
+  );
+
+  orders=JSON.parse(
+    localStorage.getItem("saad_orders") || "[]"
+  );
+
+  payments=JSON.parse(
+    localStorage.getItem("saad_payments") || "[]"
+  );
+
+  inventory=JSON.parse(
+    localStorage.getItem("saad_inventory") || "[]"
+  );
+
+  categories=JSON.parse(
+    localStorage.getItem("saad_categories") ||
+    JSON.stringify(defaultCategories)
+  );
+
+  populateCategories();
+  renderProducts();
+  renderOrders();
+  renderPayments();
+  renderProfit();
+  renderInventory();
+  renderCustomers();
+  updateDashboard();
+
+  alert("Admin panel refreshed.");
+}
+
+/* =========================================================
+   START
+   ========================================================= */
+
+populateCategories();
+loadBank();
+loadSettings();
+renderProducts();
+renderOrders();
+renderPayments();
+renderProfit();
+renderInventory();
+renderCustomers();
+updateDashboard();
+
+</script>
+
+</body>
+  </html>
