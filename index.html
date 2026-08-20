@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b7a53">
+<title>Saad Traders — Admin Panel</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f4f6f8;
+  color:#17202a;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.app{display:flex;min-height:100vh}
+
+.sidebar{
+  width:250px;
+  background:#092d22;
+  color:white;
+  padding:20px 14px;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  z-index:20;
+}
+.logo{
+  font-size:23px;
+  font-weight:800;
+  padding:15px 12px 25px;
+}
+.logo small{
+  display:block;
+  font-size:12px;
+  opacity:.7;
+  margin-top:5px;
+}
+.nav button{
+  width:100%;
+  background:transparent;
+  color:#dceee8;
+  padding:14px 15px;
+  margin:3px 0;
+  border-radius:10px;
+  text-align:left;
+}
+.nav button:hover,.nav button.active{
+  background:#0b7a53;
+  color:#fff;
+}
+.logout{
+  position:absolute;
+  bottom:20px;
+  left:14px;
+  right:14px;
+  background:#b42318;
+  color:#fff;
+  padding:13px;
+  border-radius:10px;
+}
+
+.main{
+  margin-left:250px;
+  width:calc(100% - 250px);
+}
+.topbar{
+  background:#fff;
+  padding:15px 25px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.menuBtn{
+  display:none;
+  background:#0b7a53;
+  color:#fff;
+  padding:9px 12px;
+  border-radius:8px;
+}
+.userBox{font-size:13px;color:#68737d}
+
+.content{padding:25px;max-width:1400px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+
+h1{font-size:28px;margin-bottom:7px}
+.subtitle{color:#6b7280;margin-bottom:22px}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:25px;
+}
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+.card .icon{font-size:25px}
+.card h3{font-size:14px;color:#667085;margin-top:12px}
+.card strong{font-size:27px;display:block;margin-top:5px}
+
+.panel{
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+  margin-bottom:20px;
+}
+.panelTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+}
+.panelTitle h2{font-size:19px}
+
+.btn{
+  padding:10px 15px;
+  border-radius:8px;
+  color:#fff;
+  background:#0b7a53;
+}
+.btn:hover{opacity:.9}
+.btn.red{background:#b42318}
+.btn.gray{background:#667085}
+.btn.blue{background:#2563eb}
+.btn.orange{background:#d97706}
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+.field{margin-bottom:14px}
+.field label{
+  display:block;
+  font-weight:600;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.field input,.field textarea,.field select{
+  width:100%;
+  padding:12px;
+  border:1px solid #d0d5dd;
+  border-radius:8px;
+  outline:none;
+  background:#fff;
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  border-color:#0b7a53;
+}
+textarea{min-height:90px;resize:vertical}
+
+.tableWrap{overflow-x:auto}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+th,td{
+  text-align:left;
+  padding:13px 10px;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+}
+th{background:#f8fafc;color:#475467}
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+}
+.green{background:#dcfce7;color:#166534}
+.yellow{background:#fef3c7;color:#92400e}
+.redBadge{background:#fee2e2;color:#991b1b}
+.grayBadge{background:#e5e7eb;color:#374151}
+
+.productImg{
+  width:55px;
+  height:55px;
+  object-fit:cover;
+  border-radius:8px;
+  background:#eee;
+}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+
+.loginScreen{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#062d21,#0b7a53);
+  padding:20px;
+}
+.loginBox{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 15px 50px rgba(0,0,0,.25);
+}
+.loginBox h1{color:#092d22}
+.loginBox p{color:#667085;margin:8px 0 25px}
+.loginLogo{
+  width:65px;
+  height:65px;
+  border-radius:15px;
+  background:#0b7a53;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:800;
+  margin-bottom:18px;
+}
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:15px;
+  display:none;
+}
+.success{
+  background:#dcfce7;
+  color:#166534;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:15px;
+  display:none;
+}
+.empty{
+  padding:30px;
+  text-align:center;
+  color:#667085;
+}
+.search{
+  max-width:350px;
+  padding:11px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+.qrPreview{
+  max-width:220px;
+  max-height:220px;
+  border-radius:10px;
+  margin-top:10px;
+  display:none;
+}
+.statLine{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid #eee;
+}
+.mobileOverlay{display:none}
+
+@media(max-width:900px){
+  .sidebar{
+    transform:translateX(-100%);
+    transition:.25s;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .main{
+    margin-left:0;
+    width:100%;
+  }
+  .menuBtn{display:block}
+  .cards{grid-template-columns:1fr 1fr}
+  .grid2{grid-template-columns:1fr}
+  .content{padding:15px}
+}
+@media(max-width:550px){
+  .cards{grid-template-columns:1fr}
+  .topbar{padding:12px 15px}
+  .userBox{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="loginScreen">
+  <div class="loginBox">
+    <div class="loginLogo">ST</div>
+    <h1>Saad Traders</h1>
+    <p>Advanced Admin Panel</p>
+
+    <div id="loginError" class="error"></div>
+
+    <div class="field">
+      <label>Admin Email</label>
+      <input id="loginEmail" type="email" placeholder="admin@example.com">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="Password">
+    </div>
+
+    <button class="btn" style="width:100%;padding:13px" onclick="login()">
+      Login to Admin
+    </button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app" style="display:none">
+
+  <aside id="sidebar" class="sidebar">
+    <div class="logo">
+      SAAD TRADERS
+      <small>ADMIN CONTROL PANEL</small>
+    </div>
+
+    <div class="nav">
+      <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+      <button onclick="showPage('products',this)">📦 Products</button>
+      <button onclick="showPage('orders',this)">🛒 Orders</button>
+      <button onclick="showPage('payments',this)">💳 Payment Settings</button>
+      <button onclick="showPage('settings',this)">⚙️ Settings</button>
+    </div>
+
+    <button class="logout" onclick="logout()">Logout</button>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <button class="menuBtn" onclick="toggleMenu()">☰</button>
+      <strong>Saad Traders Admin</strong>
+      <div class="userBox" id="currentUser"></div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="page active">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Business overview</p>
+
+        <div class="cards">
+          <div class="card">
+            <div class="icon">📦</div>
+            <h3>Products</h3>
+            <strong id="statProducts">0</strong>
+          </div>
+
+          <div class="card">
+            <div class="icon">🛒</div>
+            <h3>Orders</h3>
+            <strong id="statOrders">0</strong>
+          </div>
+
+          <div class="card">
+            <div class="icon">💰</div>
+            <h3>Sales</h3>
+            <strong id="statSales">₹0</strong>
+          </div>
+
+          <div class="card">
+            <div class="icon">⚠️</div>
+            <h3>Low Stock</h3>
+            <strong id="statLow">0</strong>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panelTitle">
+            <h2>Quick Actions</h2>
+          </div>
+
+          <div class="actions">
+            <button class="btn" onclick="showPage('products')">➕ Add Product</button>
+            <button class="btn blue" onclick="showPage('orders')">🛒 View Orders</button>
+            <button class="btn orange" onclick="showPage('payments')">💳 Payment Settings</button>
+            <button class="btn gray" onclick="loadAll()">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panelTitle">
+            <h2>System Status</h2>
+          </div>
+          <div class="statLine">
+            <span>Supabase</span>
+            <span class="badge green">CONNECTED</span>
+          </div>
+          <div class="statLine">
+            <span>Product Images</span>
+            <span class="badge green">READY</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section id="products" class="page">
+        <h1>Products</h1>
+        <p class="subtitle">Manage products, prices, stock and images.</p>
+
+        <div class="panel">
+          <div class="panelTitle">
+            <h2>Add / Edit Product</h2>
+            <button class="btn gray" onclick="clearProductForm()">Clear</button>
+          </div>
+
+          <div id="productMessage"></div>
+
+          <input type="hidden" id="productId">
+
+          <div class="grid2">
+
+            <div class="field">
+              <label>Product Name *</label>
+              <input id="productName" placeholder="Example: Aashirvaad Atta 5kg">
+            </div>
+
+            <div class="field">
+              <label>Category</label>
+              <input id="productCategory" placeholder="Grocery">
+            </div>
+
+            <div class="field">
+              <label>Price *</label>
+              <input id="productPrice" type="number" step="0.01" placeholder="299">
+            </div>
+
+            <div class="field">
+              <label>MRP</label>
+              <input id="productMrp" type="number" step="0.01" placeholder="350">
+            </div>
+
+            <div class="field">
+              <label>Stock</label>
+              <input id="productStock" type="number" placeholder="50">
+            </div>
+
+            <div class="field">
+              <label>Unit</label>
+              <input id="productUnit" placeholder="piece / kg / litre">
+            </div>
+
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <textarea id="productDescription" placeholder="Product description"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Product Image</label>
+            <input id="productImage" type="file" accept="image/*">
+            <img id="productPreview" class="qrPreview">
+          </div>
+
+          <button class="btn" onclick="saveProduct()">💾 Save Product</button>
+        </div>
+
+        <div class="panel">
+          <div class="panelTitle">
+            <h2>Product List</h2>
+            <input class="search" id="productSearch" oninput="filterProducts()" placeholder="Search products...">
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>MRP</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section id="orders" class="page">
+        <h1>Orders</h1>
+        <p class="subtitle">Accept orders and manage payment status.</p>
+
+        <div class="panel">
+          <div class="panelTitle">
+            <h2>Customer Orders</h2>
+            <button class="btn gray" onclick="loadOrders()">🔄 Refresh</button>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="orderTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section id="payments" class="page">
+        <h1>Payment Settings</h1>
+        <p class="subtitle">
+          Change the payment information shown to customers after an order is accepted.
+        </p>
+
+        <div class="panel">
+          <div id="paymentMessage"></div>
+
+          <div class="grid2">
+
+            <div class="field">
+              <label>Business Name</label>
+              <input id="payBusinessName" placeholder="Saad Traders">
+            </div>
+
+            <div class="field">
+              <label>UPI ID</label>
+              <input id="payUpi" placeholder="yourname@upi">
+            </div>
+
+            <div class="field">
+              <label>Account Holder</label>
+              <input id="payHolder" placeholder="Saad Traders">
+            </div>
+
+            <div class="field">
+              <label>Account Number</label>
+              <input id="payAccount" placeholder="Bank account number">
+            </div>
+
+            <div class="field">
+              <label>IFSC Code</label>
+              <input id="payIfsc" placeholder="SBIN0000000">
+            </div>
+
+            <div class="field">
+              <label>Bank Name</label>
+              <input id="payBank" placeholder="State Bank of India">
+            </div>
+
+          </div>
+
+          <div class="field">
+            <label>Payment Instructions</label>
+            <textarea id="payInstructions"
+              placeholder="Pay using UPI or bank transfer. After payment upload screenshot."></textarea>
+          </div>
+
+          <div class="field">
+            <label>QR Code Image</label>
+            <input id="qrFile" type="file" accept="image/*">
+            <img id="qrPreview" class="qrPreview">
+          </div>
+
+          <button class="btn" onclick="savePaymentSettings()">
+            💾 Save Payment Settings
+          </button>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-bottom:15px">Customer Payment Flow</h2>
+
+          <div class="statLine">
+            <span>Customer places order</span>
+            <b>1</b>
+          </div>
+
+          <div class="statLine">
+            <span>Admin accepts order</span>
+            <b>2</b>
+          </div>
+
+          <div class="statLine">
+            <span>Customer sees UPI / Bank / QR</span>
+            <b>3</b>
+          </div>
+
+          <div class="statLine">
+            <span>Customer completes payment</span>
+            <b>4</b>
+          </div>
+
+          <div class="statLine">
+            <span>Admin verifies payment</span>
+            <b>5</b>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="page">
+        <h1>Settings</h1>
+        <p class="subtitle">Admin panel configuration.</p>
+
+        <div class="panel">
+          <h2 style="margin-bottom:15px">Connection</h2>
+
+          <div class="statLine">
+            <span>Supabase Project</span>
+            <b>bzyonildigzsytuprfrh</b>
+          </div>
+
+          <div class="statLine">
+            <span>Storage Bucket</span>
+            <b>product-images</b>
+          </div>
+
+          <div class="statLine">
+            <span>Authentication</span>
+            <b>Supabase Auth</b>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-bottom:15px">Security</h2>
+          <p style="color:#667085;line-height:1.6">
+            Never put your Supabase secret/service-role key inside this HTML file.
+            This panel uses the public publishable key and Supabase Row Level Security.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   SUPABASE CONFIG
+   ============================================================ */
+
+const SUPABASE_URL =
+  "https://bzyonildigzsytuprfrh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+
+const BUCKET = "product-images";
+
+let products = [];
+let orders = [];
+let paymentSettings = null;
+
+
+/* ============================================================
+   SUPABASE REQUEST HELPER
+   ============================================================ */
+
+async function sb(path, options = {}) {
+
+  const headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + SUPABASE_KEY,
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+
+  const response = await fetch(
+    SUPABASE_URL + path,
+    {
+      ...options,
+      headers
+    }
+  );
+
+  const text = await response.text();
+
+  let data = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+      data?.error_description ||
+      data?.error ||
+      text ||
+      "Supabase request failed"
+    );
+  }
+
+  return data;
+}
+
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+
+async function login(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const error =
+    document.getElementById("loginError");
+
+  error.style.display = "none";
+
+  if(!email || !password){
+    error.textContent = "Enter email and password.";
+    error.style.display = "block";
+    return;
+  }
+
+  try{
+
+    const result = await fetch(
+      SUPABASE_URL + "/auth/v1/token?grant_type=password",
+      {
+        method:"POST",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          email,
+          password
+        })
+      }
+    );
+
+    const data = await result.json();
+
+    if(!result.ok){
+      throw new Error(
+        data.error_description ||
+        data.msg ||
+        "Login failed"
+      );
+    }
+
+    localStorage.setItem(
+      "saad_admin_session",
+      JSON.stringify(data)
+    );
+
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="flex";
+
+    document.getElementById("currentUser").textContent =
+      data.user?.email || email;
+
+    loadAll();
+
+  }catch(err){
+
+    error.textContent = err.message;
+    error.style.display = "block";
+  }
+}
+
+
+function logout(){
+
+  localStorage.removeItem("saad_admin_session");
+
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginScreen").style.display="flex";
+}
+
+
+/* ============================================================
+   STARTUP
+   ============================================================ */
+
+window.addEventListener("load",()=>{
+
+  const session =
+    localStorage.getItem("saad_admin_session");
+
+  if(session){
+
+    try{
+
+      const data = JSON.parse(session);
+
+      document.getElementById("loginScreen").style.display="none";
+      document.getElementById("app").style.display="flex";
+
+      document.getElementById("currentUser").textContent =
+        data.user?.email || "";
+
+      loadAll();
+
+    }catch{
+
+      localStorage.removeItem("saad_admin_session");
+
+    }
+  }
+});
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+function showPage(id, button){
+
+  document.querySelectorAll(".page")
+    .forEach(p=>p.classList.remove("active"));
+
+  document.getElementById(id)
+    .classList.add("active");
+
+  if(button){
+
+    document.querySelectorAll(".nav button")
+      .forEach(b=>b.classList.remove("active"));
+
+    button.classList.add("active");
+  }
+
+  document.getElementById("sidebar")
+    .classList.remove("open");
+
+  if(id==="products") loadProducts();
+  if(id==="orders") loadOrders();
+  if(id==="payments") loadPaymentSettings();
+}
+
+
+function toggleMenu(){
+  document.getElementById("sidebar")
+    .classList.toggle("open");
+}
+
+
+/* ============================================================
+   LOAD ALL
+   ============================================================ */
+
+async function loadAll(){
+
+  await Promise.allSettled([
+    loadProducts(),
+    loadOrders(),
+    loadPaymentSettings()
+  ]);
+
+  updateDashboard();
+}
+
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+
+async function loadProducts(){
+
+  try{
+
+    products = await sb(
+      "/rest/v1/products?select=*&order=created_at.desc"
+    );
+
+    if(!Array.isArray(products))
+      products=[];
+
+    renderProducts();
+    updateDashboard();
+
+  }catch(err){
+
+    console.error("Products:",err);
+
+    document.getElementById("productTable").innerHTML =
+      `<tr><td colspan="7" class="empty">
+      Products table could not be loaded.<br><br>
+      ${escapeHtml(err.message)}
+      </td></tr>`;
+
+  }
+}
+
+
+function renderProducts(list = products){
+
+  const table =
+    document.getElementById("productTable");
+
+  if(!list.length){
+
+    table.innerHTML =
+      `<tr><td colspan="7" class="empty">
+      No products found.
+      </td></tr>`;
+
+    return;
+  }
+
+  table.innerHTML = list.map(p=>{
+
+    const image =
+      p.image_url ||
+      p.image ||
+      p.photo_url ||
+      "";
+
+    return `
+      <tr>
+
+        <td>
+          ${
+            image
+            ? `<img class="productImg"
+                    src="${escapeAttr(image)}"
+                    onerror="this.style.display='none'">`
+            : "—"
+          }
+        </td>
+
+        <td><b>${escapeHtml(p.name || p.product_name || "Unnamed")}</b></td>
+
+        <td>${escapeHtml(p.category || "—")}</td>
+
+        <td>₹${Number(p.price || 0).toLocaleString("en-IN")}</td>
+
+        <td>₹${Number(p.mrp || 0).toLocaleString("en-IN")}</td>
+
+        <td>
+          ${
+            Number(p.stock || 0) <= 5
+            ? `<span class="badge yellow">${p.stock || 0}</span>`
+            : `<span class="badge green">${p.stock || 0}</span>`
+          }
+        </td>
+
+        <td>
+          <div class="actions">
+
+            <button class="btn blue"
+              onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+              Edit
+            </button>
+
+            <button class="btn red"
+              onclick="deleteProduct('${escapeAttr(p.id)}')">
+              Delete
+            </button>
+
+          </div>
+        </td>
+
+      </tr>
+    `;
+
+  }).join("");
+}
+
+
+function filterProducts(){
+
+  const q =
+    document.getElementById("productSearch")
+      .value.toLowerCase();
+
+  const filtered =
+    products.filter(p=>
+      String(p.name || p.product_name || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(p.category || "")
+        .toLowerCase()
+        .includes(q)
+    );
+
+  renderProducts(filtered);
+}
+
+
+async function saveProduct(){
+
+  const id =
+    document.getElementById("productId").value;
+
+  const name =
+    document.getElementById("productName").value.trim();
+
+  if(!name){
+    showMessage("productMessage","Product name is required.","error");
+    return;
+  }
+
+  const price =
+    Number(document.getElementById("productPrice").value || 0);
+
+  const mrp =
+    Number(document.getElementById("productMrp").value || 0);
+
+  const stock =
+    Number(document.getElementById("productStock").value || 0);
+
+  const category =
+    document.getElementById("productCategory").value.trim();
+
+  const unit =
+    document.getElementById("productUnit").value.trim();
+
+  const description =
+    document.getElementById("productDescription").value.trim();
+
+  try{
+
+    let imageUrl = "";
+
+    const file =
+      document.getElementById("productImage").files[0];
+
+    if(file){
+
+      imageUrl =
+        await uploadFile(file,"products");
+
+    }else{
+
+      const old =
+        products.find(x=>String(x.id)===String(id));
+
+      imageUrl =
+        old?.image_url ||
+        old?.image ||
+        old?.photo_url ||
+        "";
+    }
+
+    const record = {
+      name,
+      category,
+      price,
+      mrp,
+      stock,
+      unit,
+      description,
+      image_url:imageUrl
+    };
+
+    if(id){
+
+      await sb(
+        "/rest/v1/products?id=eq." +
+        encodeURIComponent(id),
+        {
+          method:"PATCH",
+          headers:{
+            "Prefer":"return=minimal"
+          },
+          body:JSON.stringify(record)
+        }
+      );
+
+      showMessage(
+        "productMessage",
+        "Product updated successfully.",
+        "success"
+      );
+
+    }else{
+
+      await sb(
+        "/rest/v1/products",
+        {
+          method:"POST",
+          headers:{
+            "Prefer":"return=representation"
+          },
+          body:JSON.stringify(record)
+        }
+      );
+
+      showMessage(
+        "productMessage",
+        "Product created successfully.",
+        "success"
+      );
+    }
+
+    clearProductForm();
+    await loadProducts();
+
+  }catch(err){
+
+    showMessage(
+      "productMessage",
+      err.message,
+      "error"
+    );
+  }
+}
+
+
+function editProduct(p){
+
+  document.getElementById("productId").value =
+    p.id || "";
+
+  document.getElementById("productName").value =
+    p.name || p.product_name || "";
+
+  document.getElementById("productCategory").value =
+    p.category || "";
+
+  document.getElementById("productPrice").value =
+    p.price || "";
+
+  document.getElementById("productMrp").value =
+    p.mrp || "";
+
+  document.getElementById("productStock").value =
+    p.stock || 0;
+
+  document.getElementById("productUnit").value =
+    p.unit || "";
+
+  document.getElementById("productDescription").value =
+    p.description || "";
+
+  document.getElementById("products")
+    .scrollIntoView({behavior:"smooth"});
+
+  document.getElementById("productName").focus();
+}
+
+
+function clearProductForm(){
+
+  [
+    "productId",
+    "productName",
+    "productCategory",
+    "productPrice",
+    "productMrp",
+    "productStock",
+    "productUnit",
+    "productDescription"
+  ].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+
+  document.getElementById("productImage").value="";
+}
+
+
+async function deleteProduct(id){
+
+  if(!confirm("Delete this product?"))
+    return;
+
+  try{
+
+    await sb(
+      "/rest/v1/products?id=eq." +
+      encodeURIComponent(id),
+      {
+        method:"DELETE"
+      }
+    );
+
+    await loadProducts();
+
+  }catch(err){
+
+    alert("Delete failed: " + err.message);
+
+  }
+}
+
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+
+async function uploadFile(file,folder){
+
+  const safe =
+    file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+
+  const filename =
+    folder + "/" +
+    Date.now() + "_" +
+    safe;
+
+  const response =
+    await fetch(
+      SUPABASE_URL +
+      "/storage/v1/object/" +
+      BUCKET +
+      "/" +
+      filename,
+      {
+        method:"POST",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":"Bearer "+SUPABASE_KEY,
+          "Content-Type":file.type || "application/octet-stream"
+        },
+        body:file
+      }
+    );
+
+  if(!response.ok){
+
+    const text=await response.text();
+
+    throw new Error(
+      "Image upload failed: " + text
+    );
+  }
+
+  return SUPABASE_URL +
+    "/storage/v1/object/public/" +
+    BUCKET +
+    "/" +
+    filename;
+}
+
+
+/* ============================================================
+   ORDERS
+   ============================================================ */
+
+async function loadOrders(){
+
+  try{
+
+    orders =
+      await sb(
+        "/rest/v1/orders?select=*&order=created_at.desc"
+      );
+
+    if(!Array.isArray(orders))
+      orders=[];
+
+    renderOrders();
+    updateDashboard();
+
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("orderTable").innerHTML =
+      `<tr><td colspan="7" class="empty">
+      Orders table could not be loaded.<br><br>
+      ${escapeHtml(err.message)}
+      </td></tr>`;
+  }
+}
+
+
+function renderOrders(){
+
+  const table =
+    document.getElementById("orderTable");
+
+  if(!orders.length){
+
+    table.innerHTML =
+      `<tr><td colspan="7" class="empty">
+      No orders found.
+      </td></tr>`;
+
+    return;
+  }
+
+  table.innerHTML =
+    orders.map(o=>{
+
+      const status =
+        String(
+          o.status ||
+          o.order_status ||
+          "pending"
+        ).toLowerCase();
+
+      const payment =
+        String(
+          o.payment_status ||
+          o.payment ||
+          "pending"
+        ).toLowerCase();
+
+      const amount =
+        Number(
+          o.total ||
+          o.total_amount ||
+          o.amount ||
+          0
+        );
+
+      return `
+        <tr>
+
+          <td>
+            <b>${escapeHtml(
+              String(o.id || "").slice(0,8)
+            )}</b>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              o.customer_name ||
+              o.name ||
+              o.customer ||
+              "Customer"
+            )}
+          </td>
+
+          <td>₹${amount.toLocaleString("en-IN")}</td>
+
+          <td>
+            <span class="badge ${
+              status==="accepted" ||
+              status==="confirmed"
+              ? "green"
+              : status==="rejected" ||
+                status==="cancelled"
+              ? "redBadge"
+              : "yellow"
+            }">
+              ${escapeHtml(status)}
+            </span>
+          </td>
+
+          <td>
+            <span class="badge ${
+              payment==="paid"
+              ? "green"
+              : "yellow"
+            }">
+              ${escapeHtml(payment)}
+            </span>
+          </td>
+
+          <td>
+            ${formatDate(
+              o.created_at
+            )}
+          </td>
+
+          <td>
+            <div class="actions">
+
+              <button class="btn"
+                onclick="updateOrder('${escapeAttr(o.id)}','accepted')">
+                Accept
+              </button>
+
+              <button class="btn red"
+                onclick="updateOrder('${escapeAttr(o.id)}','rejected')">
+                Reject
+              </button>
+
+              <button class="btn blue"
+                onclick="updatePayment('${escapeAttr(o.id)}','paid')">
+                Paid
+              </button>
+
+            </div>
+          </td>
+
+        </tr>
+      `;
+
+    }).join("");
+}
+
+
+async function updateOrder(id,status){
+
+  try{
+
+    await sb(
+      "/rest/v1/orders?id=eq."+
+      encodeURIComponent(id),
+      {
+        method:"PATCH",
+        headers:{
+          "Prefer":"return=minimal"
+        },
+        body:JSON.stringify({
+          status:status
+        })
+      }
+    );
+
+    await loadOrders();
+
+    alert(
+      status==="accepted"
+      ? "Order accepted. Customer can now be shown payment information."
+      : "Order rejected."
+    );
+
+  }catch(err){
+
+    alert(
+      "Could not update order: " +
+      err.message
+    );
+  }
+}
+
+
+async function updatePayment(id,status){
+
+  try{
+
+    await sb(
+      "/rest/v1/orders?id=eq."+
+      encodeURIComponent(id),
+      {
+        method:"PATCH",
+        headers:{
+          "Prefer":"return=minimal"
+        },
+        body:JSON.stringify({
+          payment_status:status
+        })
+      }
+    );
+
+    await loadOrders();
+
+  }catch(err){
+
+    alert(
+      "Payment update failed: " +
+      err.message
+    );
+  }
+}
+
+
+/* ============================================================
+   PAYMENT SETTINGS
+   ============================================================ */
+
+async function loadPaymentSettings(){
+
+  try{
+
+    const data =
+      await sb(
+        "/rest/v1/payment_settings?select=*&limit=1"
+      );
+
+    paymentSettings =
+      Array.isArray(data)
+      ? data[0]
+      : data;
+
+    if(!paymentSettings)
+      return;
+
+    document.getElementById("payBusinessName").value =
+      paymentSettings.business_name || "";
+
+    document.getElementById("payUpi").value =
+      paymentSettings.upi_id || "";
+
+    document.getElementById("payHolder").value =
+      paymentSettings.account_holder || "";
+
+    document.getElementById("payAccount").value =
+      paymentSettings.account_number || "";
+
+    document.getElementById("payIfsc").value =
+      paymentSettings.ifsc || "";
+
+    document.getElementById("payBank").value =
+      paymentSettings.bank_name || "";
+
+    document.getElementById("payInstructions").value =
+      paymentSettings.instructions || "";
+
+    if(paymentSettings.qr_url){
+
+      const preview =
+        document.getElementById("qrPreview");
+
+      preview.src =
+        paymentSettings.qr_url;
+
+      preview.style.display="block";
+    }
+
+  }catch(err){
+
+    console.error(
+      "Payment settings:",
+      err
+    );
+  }
+}
+
+
+async function savePaymentSettings(){
+
+  try{
+
+    let qrUrl =
+      paymentSettings?.qr_url || "";
+
+    const file =
+      document.getElementById("qrFile").files[0];
+
+    if(file){
+
+      qrUrl =
+        await uploadFile(
+          file,
+          "payment"
+        );
+    }
+
+    const record = {
+
+      business_name:
+        document.getElementById(
+          "payBusinessName"
+        ).value.trim(),
+
+      upi_id:
+        document.getElementById(
+          "payUpi"
+        ).value.trim(),
+
+      account_holder:
+        document.getElementById(
+          "payHolder"
+        ).value.trim(),
+
+      account_number:
+        document.getElementById(
+          "payAccount"
+        ).value.trim(),
+
+      ifsc:
+        document.getElementById(
+          "payIfsc"
+        ).value.trim(),
+
+      bank_name:
+        document.getElementById(
+          "payBank"
+        ).value.trim(),
+
+      instructions:
+        document.getElementById(
+          "payInstructions"
+        ).value.trim(),
+
+      qr_url:qrUrl
+    };
+
+    if(paymentSettings?.id){
+
+      await sb(
+        "/rest/v1/payment_settings?id=eq."+
+        encodeURIComponent(paymentSettings.id),
+        {
+          method:"PATCH",
+          headers:{
+            "Prefer":"return=minimal"
+          },
+          body:JSON.stringify(record)
+        }
+      );
+
+    }else{
+
+      await sb(
+        "/rest/v1/payment_settings",
+        {
+          method:"POST",
+          headers:{
+            "Prefer":"return=representation"
+          },
+          body:JSON.stringify(record)
+        }
+      );
+    }
+
+    showMessage(
+      "paymentMessage",
+      "Payment settings saved successfully.",
+      "success"
+    );
+
+    await loadPaymentSettings();
+
+  }catch(err){
+
+    showMessage(
+      "paymentMessage",
+      err.message,
+      "error"
+    );
+  }
+}
+
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
+function updateDashboard(){
+
+  document.getElementById("statProducts")
+    .textContent = products.length;
+
+  document.getElementById("statOrders")
+    .textContent = orders.length;
+
+  const sales =
+    orders.reduce((sum,o)=>{
+
+      const status =
+        String(
+          o.status ||
+          o.order_status ||
+          ""
+        ).toLowerCase();
+
+      if(
+        status==="accepted" ||
+        status==="confirmed" ||
+        status==="delivered"
+      ){
+
+        return sum + Number(
+          o.total ||
+          o.total_amount ||
+          o.amount ||
+          0
+        );
+      }
+
+      return sum;
+
+    },0);
+
+  document.getElementById("statSales")
+    .textContent =
+      "₹" + sales.toLocaleString("en-IN");
+
+  const low =
+    products.filter(
+      p=>Number(p.stock || 0)<=5
+    ).length;
+
+  document.getElementById("statLow")
+    .textContent = low;
+}
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function showMessage(id,text,type){
+
+  const el =
+    document.getElementById(id);
+
+  el.className =
+    type==="success"
+    ? "success"
+    : "error";
+
+  el.textContent=text;
+  el.style.display="block";
+
+  setTimeout(()=>{
+    el.style.display="none";
+  },5000);
+}
+
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function escapeAttr(value){
+  return String(value ?? "")
+    .replace(/'/g,"&#039;")
+    .replace(/"/g,"&quot;");
+}
+
+
+function formatDate(value){
+
+  if(!value) return "—";
+
+  try{
+    return new Date(value)
+      .toLocaleString("en-IN");
+  }catch{
+    return value;
+  }
+}
+
+
+/* ============================================================
+   IMAGE PREVIEWS
+   ============================================================ */
+
+document.getElementById("qrFile")
+  .addEventListener("change",function(){
+
+    const file=this.files[0];
+
+    if(!file)return;
+
+    const preview =
+      document.getElementById("qrPreview");
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.style.display="block";
+  });
+
+
+document.getElementById("productImage")
+  .addEventListener("change",function(){
+
+    const file=this.files[0];
+
+    if(!file)return;
+
+    const preview =
+      document.getElementById("productPreview");
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.style.display="block";
+  });
+
+</script>
+
+</body>
+  </html>
