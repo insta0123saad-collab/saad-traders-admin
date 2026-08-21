@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Admin</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,Helvetica,sans-serif;
+ background:#f4f6f8;
+ color:#17202a
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.header{
+ background:#087f5b;
+ color:#fff;
+ padding:15px;
+ position:sticky;
+ top:0;
+ z-index:50;
+ box-shadow:0 2px 10px #0002
+}
+.head{
+ max-width:1200px;
+ margin:auto;
+ display:flex;
+ justify-content:space-between;
+ align-items:center
+}
+.logo{font-size:22px;font-weight:800}
+.logo small{display:block;font-size:11px;opacity:.8}
+.container{max-width:1200px;margin:auto;padding:16px}
+.tabs{
+ display:flex;
+ gap:8px;
+ overflow:auto;
+ margin-bottom:16px
+}
+.tab{
+ border:0;
+ background:#fff;
+ border-radius:9px;
+ padding:11px 15px;
+ font-weight:700;
+ white-space:nowrap
+}
+.tab.active{background:#087f5b;color:#fff}
+.section{display:none}
+.section.active{display:block}
+
+.cards{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:12px;
+ margin-bottom:16px
+}
+.card{
+ background:#fff;
+ padding:17px;
+ border-radius:12px;
+ border:1px solid #e5e7eb
+}
+.card small{color:#777}
+.num{font-size:28px;font-weight:800;margin-top:7px}
+
+.panel{
+ background:#fff;
+ border-radius:12px;
+ padding:18px;
+ border:1px solid #e5e7eb;
+ margin-bottom:16px
+}
+.panelhead{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+ flex-wrap:wrap;
+ margin-bottom:15px
+}
+.panel h2{font-size:19px;margin:0}
+
+.btn{
+ border:0;
+ border-radius:8px;
+ padding:10px 14px;
+ font-weight:700
+}
+.primary{background:#087f5b;color:#fff}
+.secondary{background:#e9ecef}
+.danger{background:#d63031;color:#fff}
+.warning{background:#f39c12;color:#fff}
+
+.search{
+ width:100%;
+ padding:12px;
+ border:1px solid #ddd;
+ border-radius:9px;
+ margin-bottom:15px
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:13px
+}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:13px;font-weight:700}
+.field input,
+.field select,
+.field textarea{
+ width:100%;
+ border:1px solid #d1d5db;
+ border-radius:8px;
+ padding:11px;
+ background:#fff;
+ outline:none
+}
+.field textarea{min-height:80px;resize:vertical}
+
+.products{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:13px
+}
+.product{
+ background:#fff;
+ border:1px solid #e5e7eb;
+ border-radius:12px;
+ overflow:hidden
+}
+.product img{
+ width:100%;
+ height:180px;
+ object-fit:contain;
+ background:#fafafa
+}
+.noimg{
+ height:180px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ color:#aaa;
+ background:#fafafa
+}
+.pbody{padding:12px}
+.pname{font-weight:800}
+.meta{font-size:12px;color:#777;margin-top:4px}
+.price{
+ color:#087f5b;
+ font-size:18px;
+ font-weight:800;
+ margin-top:8px
+}
+.actions{display:flex;gap:7px;margin-top:10px}
+.actions button{
+ flex:1;
+ border:0;
+ padding:8px;
+ border-radius:7px;
+ font-size:12px;
+ font-weight:700
+}
+.stock{
+ display:inline-block;
+ padding:5px 8px;
+ border-radius:6px;
+ font-size:11px;
+ font-weight:700;
+ margin-top:7px
+}
+.ok{background:#dff7ea;color:#087f5b}
+.low{background:#fff3cd;color:#8a6700}
+.out{background:#ffe0e0;color:#c0392b}
+
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{
+ padding:11px;
+ border-bottom:1px solid #eee;
+ text-align:left;
+ font-size:13px
+}
+th{background:#f7f8f8}
+
+.modal{
+ position:fixed;
+ inset:0;
+ background:#0008;
+ display:none;
+ justify-content:center;
+ align-items:center;
+ padding:15px;
+ z-index:100
+}
+.modal.show{display:flex}
+.modalbox{
+ background:#fff;
+ width:min(700px,100%);
+ max-height:94vh;
+ overflow:auto;
+ border-radius:14px;
+ padding:20px
+}
+.modalhead{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:15px
+}
+.close{
+ border:0;
+ background:#eee;
+ width:34px;
+ height:34px;
+ border-radius:50%;
+ font-size:20px
+}
+.formactions{
+ display:flex;
+ justify-content:flex-end;
+ gap:8px;
+ margin-top:18px
+}
+.preview{
+ width:130px;
+ height:130px;
+ object-fit:contain;
+ border:1px solid #ddd;
+ border-radius:8px;
+ display:none;
+ margin-top:10px
+}
+
+.login{
+ position:fixed;
+ inset:0;
+ background:#f4f6f8;
+ z-index:999;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ padding:20px
+}
+.loginbox{
+ width:min(420px,100%);
+ background:#fff;
+ padding:25px;
+ border-radius:15px;
+ box-shadow:0 5px 30px #0002
+}
+.loginbox h1{margin-top:0}
+.loginbox input{
+ width:100%;
+ padding:12px;
+ margin:7px 0 12px;
+ border:1px solid #ddd;
+ border-radius:8px
+}
+
+.toast{
+ position:fixed;
+ bottom:20px;
+ left:50%;
+ transform:translate(-50%,100px);
+ background:#222;
+ color:#fff;
+ padding:12px 18px;
+ border-radius:9px;
+ z-index:9999;
+ transition:.25s;
+ text-align:center;
+ max-width:90%
+}
+.toast.show{transform:translate(-50%,0)}
+.toast.success{background:#087f5b}
+.toast.error{background:#d63031}
+
+.empty{
+ padding:30px;
+ text-align:center;
+ color:#777
+}
+
+@media(max-width:900px){
+ .products{grid-template-columns:repeat(3,1fr)}
+ .cards{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+ .container{padding:10px}
+ .products{grid-template-columns:repeat(2,1fr);gap:8px}
+ .grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .product img,.noimg{height:140px}
+ .cards{gap:8px}
+ .card{padding:13px}
+ .num{font-size:23px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+ <div class="loginbox">
+  <h1>Saad Traders</h1>
+  <p>Admin Panel Login</p>
+
+  <input id="email" type="email"
+         placeholder="Admin email" autocomplete="username">
+
+  <input id="password" type="password"
+         placeholder="Password" autocomplete="current-password">
+
+  <button class="btn primary"
+          style="width:100%"
+          onclick="login()">
+    Login
+  </button>
+
+  <p id="loginError"
+     style="color:#d63031;font-size:13px"></p>
+ </div>
+</div>
+
+<header class="header">
+ <div class="head">
+  <div class="logo">
+   Saad Traders
+   <small>Business Admin Panel</small>
+  </div>
+
+  <button class="btn secondary" onclick="logout()">
+   Logout
+  </button>
+ </div>
+</header>
+
+<main class="container">
+
+ <div class="tabs">
+  <button class="tab active" onclick="tab('dashboard',this)">
+   Dashboard
+  </button>
+
+  <button class="tab" onclick="tab('products',this)">
+   Products
+  </button>
+
+  <button class="tab" onclick="tab('categories',this)">
+   Categories
+  </button>
+
+  <button class="tab" onclick="tab('brands',this)">
+   Brands
+  </button>
+
+  <button class="tab" onclick="tab('orders',this)">
+   Orders
+  </button>
+
+  <button class="tab" onclick="tab('payments',this)">
+   Payments
+  </button>
+ </div>
+
+ <!-- DASHBOARD -->
+ <section id="dashboard" class="section active">
+
+  <div class="cards">
+
+   <div class="card">
+    <small>Total Products</small>
+    <div id="cProducts" class="num">0</div>
+   </div>
+
+   <div class="card">
+    <small>Categories</small>
+    <div id="cCategories" class="num">0</div>
+   </div>
+
+   <div class="card">
+    <small>Low Stock</small>
+    <div id="cStock" class="num">0</div>
+   </div>
+
+   <div class="card">
+    <small>Total Orders</small>
+    <div id="cOrders" class="num">0</div>
+   </div>
+
+  </div>
+
+  <div class="panel">
+   <div class="panelhead">
+    <h2>Quick Actions</h2>
+   </div>
+
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+
+    <button class="btn primary"
+            onclick="openProduct()">
+     + Add Product
+    </button>
+
+    <button class="btn secondary"
+            onclick="openCategory()">
+     + Category
+    </button>
+
+    <button class="btn secondary"
+            onclick="openBrand()">
+     + Brand
+    </button>
+
+   </div>
+  </div>
+
+  <div class="panel">
+   <h2>Low Stock Products</h2>
+   <div id="lowStock"></div>
+  </div>
+
+ </section>
+
+ <!-- PRODUCTS -->
+ <section id="products" class="section">
+
+  <div class="panel">
+
+   <div class="panelhead">
+    <h2>Products</h2>
+
+    <button class="btn primary"
+            onclick="openProduct()">
+     + Add Product
+    </button>
+   </div>
+
+   <input id="search"
+          class="search"
+          placeholder="Search product, brand, SKU..."
+          oninput="renderProducts()">
+
+   <div id="productList" class="products"></div>
+
+  </div>
+
+ </section>
+
+ <!-- CATEGORIES -->
+ <section id="categories" class="section">
+
+  <div class="panel">
+
+   <div class="panelhead">
+    <h2>Categories</h2>
+
+    <button class="btn primary"
+            onclick="openCategory()">
+     + Add Category
+    </button>
+   </div>
+
+   <div id="categoryList"></div>
+
+  </div>
+
+ </section>
+
+ <!-- BRANDS -->
+ <section id="brands" class="section">
+
+  <div class="panel">
+
+   <div class="panelhead">
+    <h2>Brands</h2>
+
+    <button class="btn primary"
+            onclick="openBrand()">
+     + Add Brand
+    </button>
+   </div>
+
+   <div id="brandList"></div>
+
+  </div>
+
+ </section>
+
+ <!-- ORDERS -->
+ <section id="orders" class="section">
+
+  <div class="panel">
+
+   <div class="panelhead">
+    <h2>Customer Orders</h2>
+
+    <button class="btn secondary"
+            onclick="loadOrders()">
+     Refresh
+    </button>
+   </div>
+
+   <div class="tablewrap">
+
+    <table>
+
+     <thead>
+      <tr>
+       <th>Order</th>
+       <th>Customer</th>
+       <th>Phone</th>
+       <th>Total</th>
+       <th>Order Status</th>
+       <th>Payment</th>
+       <th>Date</th>
+      </tr>
+     </thead>
+
+     <tbody id="orders"></tbody>
+
+    </table>
+
+   </div>
+
+  </div>
+
+ </section>
+
+ <!-- PAYMENTS -->
+ <section id="payments" class="section">
+
+  <div class="panel">
+
+   <div class="panelhead">
+    <h2>Payments</h2>
+
+    <button class="btn secondary"
+            onclick="loadPayments()">
+     Refresh
+    </button>
+   </div>
+
+   <div class="tablewrap">
+
+    <table>
+
+     <thead>
+      <tr>
+       <th>Customer</th>
+       <th>Order</th>
+       <th>Amount</th>
+       <th>Method</th>
+       <th>Status</th>
+       <th>Reference</th>
+       <th>Date</th>
+      </tr>
+     </thead>
+
+     <tbody id="payments"></tbody>
+
+    </table>
+
+   </div>
+
+  </div>
+
+ </section>
+
+</main>
+
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="modal">
+
+ <div class="modalbox">
+
+  <div class="modalhead">
+   <h2 id="productTitle">Add Product</h2>
+   <button class="close"
+           onclick="closeModal('productModal')">×</button>
+  </div>
+
+  <input type="hidden" id="productId">
+
+  <div class="grid">
+
+   <div class="field full">
+    <label>Product Name *</label>
+    <input id="pName"
+           placeholder="Fortune Soya Oil"
+           required>
+   </div>
+
+   <div class="field">
+    <label>Brand</label>
+    <select id="pBrand">
+     <option value="">Select brand</option>
+    </select>
+   </div>
+
+   <div class="field">
+    <label>Category</label>
+    <select id="pCategory">
+     <option value="">Select category</option>
+    </select>
+   </div>
+
+   <div class="field">
+    <label>Size</label>
+    <input id="pSize"
+           placeholder="500ml / 1L / 5L">
+   </div>
+
+   <div class="field">
+    <label>Unit</label>
+    <select id="pUnit">
+     <option value="piece">Piece</option>
+     <option value="kg">Kg</option>
+     <option value="gram">Gram</option>
+     <option value="litre">Litre</option>
+     <option value="ml">ML</option>
+     <option value="pack">Pack</option>
+    </select>
+   </div>
+
+   <div class="field">
+    <label>SKU</label>
+    <input id="pSku"
+           placeholder="Optional SKU">
+   </div>
+
+   <div class="field">
+    <label>Purchase Price ₹</label>
+    <input id="pPurchase"
+           type="number"
+           min="0"
+           step="0.01">
+   </div>
+
+   <div class="field">
+    <label>Selling Price ₹ *</label>
+    <input id="pSelling"
+           type="number"
+           min="0"
+           step="0.01"
+           required>
+   </div>
+
+   <div class="field">
+    <label>MRP ₹</label>
+    <input id="pMrp"
+           type="number"
+           min="0"
+           step="0.01">
+   </div>
+
+   <div class="field">
+    <label>Stock</label>
+    <input id="pStock"
+           type="number"
+           min="0"
+           value="0">
+   </div>
+
+   <div class="field">
+    <label>GST %</label>
+    <input id="pGst"
+           type="number"
+           min="0"
+           step="0.01"
+           value="0">
+   </div>
+
+   <div class="field">
+    <label>Labour Charge ₹</label>
+    <input id="pLabour"
+           type="number"
+           min="0"
+           step="0.01"
+           value="0">
+   </div>
+
+   <div class="field">
+    <label>Bori/Pati Charge ₹</label>
+    <input id="pBori"
+           type="number"
+           min="0"
+           step="0.01"
+           value="0">
+   </div>
+
+   <div class="field full">
+    <label>Description</label>
+    <textarea id="pDescription"></textarea>
+   </div>
+
+   <div class="field full">
+    <label>Product Image</label>
+
+    <input id="pImage"
+           type="file"
+           accept="image/*"
+           onchange="preview(event,'pPreview')">
+
+    <img id="pPreview" class="preview">
+   </div>
+
+   <div>
+    <label>
+     <input id="pActive"
+            type="checkbox"
+            checked>
+     Visible to customers
+    </label>
+   </div>
+
+  </div>
+
+  <div class="formactions">
+
+   <button class="btn secondary"
+           onclick="closeModal('productModal')">
+    Cancel
+   </button>
+
+   <button id="saveProduct"
+           class="btn primary"
+           onclick="saveProduct()">
+    Save Product
+   </button>
+
+  </div>
+
+ </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div id="categoryModal" class="modal">
+
+ <div class="modalbox">
+
+  <div class="modalhead">
+   <h2>Add Category</h2>
+
+   <button class="close"
+           onclick="closeModal('categoryModal')">×</button>
+  </div>
+
+  <div class="field">
+   <label>Category Name *</label>
+   <input id="catName"
+          placeholder="Cooking Oil">
+  </div>
+
+  <div class="field" style="margin-top:12px">
+   <label>Description</label>
+   <textarea id="catDescription"></textarea>
+  </div>
+
+  <div class="field" style="margin-top:12px">
+   <label>Category Image</label>
+   <input id="catImage"
+          type="file"
+          accept="image/*">
+  </div>
+
+  <div class="formactions">
+
+   <button class="btn secondary"
+           onclick="closeModal('categoryModal')">
+    Cancel
+   </button>
+
+   <button class="btn primary"
+           onclick="saveCategory()">
+    Save Category
+   </button>
+
+  </div>
+
+ </div>
+</div>
+
+<!-- BRAND MODAL -->
+<div id="brandModal" class="modal">
+
+ <div class="modalbox">
+
+  <div class="modalhead">
+   <h2>Add Brand</h2>
+
+   <button class="close"
+           onclick="closeModal('brandModal')">×</button>
+  </div>
+
+  <div class="field">
+   <label>Brand Name *</label>
+   <input id="brandName"
+          placeholder="Fortune">
+  </div>
+
+  <div class="field" style="margin-top:12px">
+   <label>Description</label>
+   <textarea id="brandDescription"></textarea>
+  </div>
+
+  <div class="field" style="margin-top:12px">
+   <label>Brand Logo</label>
+   <input id="brandImage"
+          type="file"
+          accept="image/*">
+  </div>
+
+  <div class="formactions">
+
+   <button class="btn secondary"
+           onclick="closeModal('brandModal')">
+    Cancel
+   </button>
+
+   <button class="btn primary"
+           onclick="saveBrand()">
+    Save Brand
+   </button>
+
+  </div>
+
+ </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+/* =====================================================
+   YOUR REAL SUPABASE PROJECT
+   ===================================================== */
+
+const SUPABASE_URL =
+ "https://bzyonildigzsytuprfrh.supabase.co";
+
+const SUPABASE_KEY =
+ "sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+
+const supabaseClient =
+ window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+ );
+
+/* =====================================================
+   DATA
+   ===================================================== */
+
+let products=[];
+let categories=[];
+let brands=[];
+let orders=[];
+let payments=[];
+let editingProduct=null;
+
+/* =====================================================
+   INIT
+   ===================================================== */
+
+document.addEventListener("DOMContentLoaded",async()=>{
+
+ const {
+  data:{session}
+ }=await supabaseClient.auth.getSession();
+
+ if(session){
+
+  if(await checkAdmin()){
+   showAdmin();
+   await loadAll();
+  }else{
+   await supabaseClient.auth.signOut();
+   showLogin();
+  }
+
+ }else{
+  showLogin();
+ }
+
+});
+
+/* =====================================================
+   AUTH
+   ===================================================== */
+
+async function login(){
+
+ const email=
+  document.getElementById("email").value.trim();
+
+ const password=
+  document.getElementById("password").value;
+
+ const error=
+  document.getElementById("loginError");
+
+ error.textContent="";
+
+ if(!email||!password){
+  error.textContent="Enter email and password.";
+  return;
+ }
+
+ try{
+
+  const {error:e}=await supabaseClient.auth
+   .signInWithPassword({
+    email,
+    password
+   });
+
+  if(e) throw e;
+
+  if(!await checkAdmin()){
+   await supabaseClient.auth.signOut();
+   throw new Error("This account is not an admin.");
+  }
+
+  showAdmin();
+
+  await loadAll();
+
+ }catch(e){
+
+  error.textContent=e.message||
+   "Login failed.";
+ }
+}
+
+async function checkAdmin(){
+
+ const {data,error}=
+  await supabaseClient.rpc("is_admin");
+
+ if(error){
+  console.error(error);
+  return false;
+ }
+
+ return data===true;
+}
+
+async function logout(){
+
+ await supabaseClient.auth.signOut();
+
+ showLogin();
+}
+
+function showLogin(){
+ document.getElementById("login").style.display="flex";
+}
+
+function showAdmin(){
+ document.getElementById("login").style.display="none";
+}
+
+/* =====================================================
+   LOAD EVERYTHING
+   ===================================================== */
+
+async function loadAll(){
+
+ await Promise.all([
+  loadProducts(),
+  loadCategories(),
+  loadBrands(),
+  loadOrders(),
+  loadPayments()
+ ]);
+
+ dashboard();
+}
+
+/* =====================================================
+   PRODUCTS
+   ===================================================== */
+
+async function loadProducts(){
+
+ const {data,error}=
+  await supabaseClient
+   .from("products")
+   .select("*")
+   .order("created_at",{ascending:false});
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ products=data||[];
+
+ renderProducts();
+}
+
+function renderProducts(){
+
+ const box=
+  document.getElementById("productList");
+
+ const search=
+  (document.getElementById("search")?.value||"")
+   .toLowerCase()
+   .trim();
+
+ const list=products.filter(p=>{
+
+  const brand=
+   brands.find(b=>b.id===p.brand_id)?.name||"";
+
+  const category=
+   categories.find(c=>c.id===p.category_id)?.name||"";
+
+  return [
+   p.name,
+   p.sku,
+   p.size,
+   brand,
+   category
+  ].join(" ").toLowerCase().includes(search);
+ });
+
+ if(!list.length){
+
+  box.innerHTML=
+   `<div class="empty">
+     No products found.
+    </div>`;
+
+  return;
+ }
+
+ box.innerHTML=list.map(p=>{
+
+  const brand=
+   brands.find(b=>b.id===p.brand_id)?.name||"";
+
+  const category=
+   categories.find(c=>c.id===p.category_id)?.name||"";
+
+  const stock=Number(p.stock||0);
+
+  let cls="ok";
+
+  if(stock<=0)cls="out";
+  else if(stock<=5)cls="low";
+
+  return `
+   <div class="product">
+
+    ${
+     p.image_url
+     ?
+     `<img src="${esc(p.image_url)}"
+       onerror="this.style.display='none'">`
+     :
+     `<div class="noimg">No Image</div>`
+    }
+
+    <div class="pbody">
+
+     <div class="pname">
+      ${esc(p.name)}
+     </div>
+
+     <div class="meta">
+      ${esc(brand)}
+      ${brand&&category?" • ":""}
+      ${esc(category)}
+     </div>
+
+     <div class="meta">
+      ${esc(p.size||"")}
+      ${p.sku?" • SKU: "+esc(p.sku):""}
+     </div>
+
+     <div class="price">
+      ₹${money(p.selling_price)}
+     </div>
+
+     ${
+      p.mrp
+      ?
+      `<div class="meta">
+       MRP ₹${money(p.mrp)}
+      </div>`
+      :""
+     }
+
+     <span class="stock ${cls}">
+      ${stock<=0?"Out of stock":stock+" in stock"}
+     </span>
+
+     <div class="actions">
+
+      <button
+       style="background:#e5f5ef;color:#087f5b"
+       onclick="editProduct('${p.id}')">
+       Edit
+      </button>
+
+      <button
+       style="background:#ffe5e5;color:#d63031"
+       onclick="deleteProduct('${p.id}')">
+       Delete
+      </button>
+
+     </div>
+
+    </div>
+   </div>
+  `;
+
+ }).join("");
+}
+
+function openProduct(){
+
+ editingProduct=null;
+
+ document.getElementById("productTitle")
+  .textContent="Add Product";
+
+ document.getElementById("productId").value="";
+ document.getElementById("pName").value="";
+ document.getElementById("pSize").value="";
+ document.getElementById("pSku").value="";
+ document.getElementById("pPurchase").value="";
+ document.getElementById("pSelling").value="";
+ document.getElementById("pMrp").value="";
+ document.getElementById("pStock").value="0";
+ document.getElementById("pGst").value="0";
+ document.getElementById("pLabour").value="0";
+ document.getElementById("pBori").value="0";
+ document.getElementById("pDescription").value="";
+ document.getElementById("pImage").value="";
+ document.getElementById("pActive").checked=true;
+
+ fillSelects();
+
+ document.getElementById("pPreview").style.display="none";
+
+ document.getElementById("productModal")
+  .classList.add("show");
+}
+
+function fillSelects(
+ selectedBrand="",
+ selectedCategory=""
+){
+
+ document.getElementById("pBrand").innerHTML=
+  `<option value="">Select brand</option>`+
+  brands.map(b=>`
+   <option value="${b.id}"
+    ${b.id===selectedBrand?"selected":""}>
+    ${esc(b.name)}
+   </option>
+  `).join("");
+
+ document.getElementById("pCategory").innerHTML=
+  `<option value="">Select category</option>`+
+  categories.map(c=>`
+   <option value="${c.id}"
+    ${c.id===selectedCategory?"selected":""}>
+    ${esc(c.name)}
+   </option>
+  `).join("");
+}
+
+async function editProduct(id){
+
+ const p=products.find(x=>x.id===id);
+
+ if(!p)return;
+
+ editingProduct=p;
+
+ document.getElementById("productTitle")
+  .textContent="Edit Product";
+
+ document.getElementById("pName").value=p.name||"";
+ document.getElementById("pSize").value=p.size||"";
+ document.getElementById("pSku").value=p.sku||"";
+ document.getElementById("pPurchase").value=p.purchase_price||"";
+ document.getElementById("pSelling").value=p.selling_price||"";
+ document.getElementById("pMrp").value=p.mrp||"";
+ document.getElementById("pStock").value=p.stock||0;
+ document.getElementById("pGst").value=p.gst_rate||0;
+ document.getElementById("pLabour").value=p.labour_charge||0;
+ document.getElementById("pBori").value=p.bori_pati_charge||0;
+ document.getElementById("pUnit").value=p.unit||"piece";
+ document.getElementById("pDescription").value=p.description||"";
+ document.getElementById("pActive").checked=
+  p.is_active!==false;
+
+ fillSelects(
+  p.brand_id||"",
+  p.category_id||""
+ );
+
+ if(p.image_url){
+
+  const preview=
+   document.getElementById("pPreview");
+
+  preview.src=p.image_url;
+  preview.style.display="block";
+ }
+
+ document.getElementById("productModal")
+  .classList.add("show");
+}
+
+async function saveProduct(){
+
+ const btn=
+  document.getElementById("saveProduct");
+
+ btn.disabled=true;
+ btn.textContent="Saving...";
+
+ try{
+
+  const file=
+   document.getElementById("pImage").files[0];
+
+  let imageUrl=
+   editingProduct?.image_url||null;
+
+  let imagePath=
+   editingProduct?.image_path||null;
+
+  if(file){
+
+   const uploaded=
+    await uploadImage(file,"products");
+
+   imageUrl=uploaded.url;
+   imagePath=uploaded.path;
+  }
+
+  const row={
+
+   name:document.getElementById("pName")
+    .value.trim(),
+
+   brand_id:
+    document.getElementById("pBrand").value||null,
+
+   category_id:
+    document.getElementById("pCategory").value||null,
+
+   size:
+    document.getElementById("pSize").value.trim()||null,
+
+   sku:
+    document.getElementById("pSku").value.trim()||null,
+
+   unit:
+    document.getElementById("pUnit").value,
+
+   purchase_price:Number(
+    document.getElementById("pPurchase").value||0
+   ),
+
+   selling_price:Number(
+    document.getElementById("pSelling").value||0
+   ),
+
+   mrp:Number(
+    document.getElementById("pMrp").value||0
+   ),
+
+   stock:Number(
+    document.getElementById("pStock").value||0
+   ),
+
+   gst_rate:Number(
+    document.getElementById("pGst").value||0
+   ),
+
+   labour_charge:Number(
+    document.getElementById("pLabour").value||0
+   ),
+
+   bori_pati_charge:Number(
+    document.getElementById("pBori").value||0
+   ),
+
+   description:
+    document.getElementById("pDescription")
+     .value.trim()||null,
+
+   image_url:imageUrl,
+   image_path:imagePath,
+
+   is_active:
+    document.getElementById("pActive").checked
+  };
+
+  if(!row.name)
+   throw new Error("Product name is required.");
+
+  if(!row.selling_price)
+   throw new Error("Selling price is required.");
+
+  let error;
+
+  if(editingProduct){
+
+   ({error}=await supabaseClient
+    .from("products")
+    .update(row)
+    .eq("id",editingProduct.id));
+
+  }else{
+
+   ({error}=await supabaseClient
+    .from("products")
+    .insert(row));
+  }
+
+  if(error)throw error;
+
+  closeModal("productModal");
+
+  toast(
+   editingProduct
+   ?"Product updated"
+   :"Product added",
+   "success"
+  );
+
+  await loadProducts();
+  dashboard();
+
+ }catch(e){
+
+  console.error(e);
+  toast(e.message,"error");
+
+ }finally{
+
+  btn.disabled=false;
+  btn.textContent="Save Product";
+ }
+}
+
+async function deleteProduct(id){
+
+ const p=products.find(x=>x.id===id);
+
+ if(!p)return;
+
+ if(!confirm(
+  `Delete "${p.name}"?\n\nThis cannot be undone.`
+ ))return;
+
+ const {error}=
+  await supabaseClient
+   .from("products")
+   .delete()
+   .eq("id",id);
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ products=products.filter(x=>x.id!==id);
+
+ renderProducts();
+ dashboard();
+
+ toast("Product deleted","success");
+}
+
+/* =====================================================
+   CATEGORIES
+   ===================================================== */
+
+async function loadCategories(){
+
+ const {data,error}=
+  await supabaseClient
+   .from("categories")
+   .select("*")
+   .order("sort_order",{ascending:true})
+   .order("name",{ascending:true});
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ categories=data||[];
+
+ renderCategories();
+ fillSelects();
+}
+
+function renderCategories(){
+
+ const box=
+  document.getElementById("categoryList");
+
+ if(!categories.length){
+  box.innerHTML=
+   `<div class="empty">No categories.</div>`;
+  return;
+ }
+
+ box.innerHTML=categories.map(c=>`
+
+  <div style="
+   display:flex;
+   justify-content:space-between;
+   align-items:center;
+   padding:12px;
+   border-bottom:1px solid #eee">
+
+   <div>
+    <strong>${esc(c.name)}</strong>
+
+    <div class="meta">
+     ${esc(c.description||"")}
+    </div>
+   </div>
+
+   <button class="btn danger"
+    onclick="deleteCategory('${c.id}')">
+    Delete
+   </button>
+
+  </div>
+
+ `).join("");
+}
+
+function openCategory(){
+
+ document.getElementById("catName").value="";
+ document.getElementById("catDescription").value="";
+ document.getElementById("catImage").value="";
+
+ document.getElementById("categoryModal")
+  .classList.add("show");
+}
+
+async function saveCategory(){
+
+ const name=
+  document.getElementById("catName")
+   .value.trim();
+
+ if(!name){
+  toast("Category name required","error");
+  return;
+ }
+
+ try{
+
+  let imagePath=null;
+
+  const file=
+   document.getElementById("catImage").files[0];
+
+  if(file){
+
+   const upload=
+    await uploadImage(file,"categories");
+
+   imagePath=upload.path;
+  }
+
+  const {error}=
+   await supabaseClient
+    .from("categories")
+    .insert({
+
+     name,
+
+     description:
+      document.getElementById("catDescription")
+       .value.trim()||null,
+
+     image_path:imagePath,
+
+     is_active:true,
+
+     sort_order:categories.length
+    });
+
+  if(error)throw error;
+
+  closeModal("categoryModal");
+
+  await loadCategories();
+
+  dashboard();
+
+  toast("Category added","success");
+
+ }catch(e){
+
+  toast(e.message,"error");
+ }
+}
+
+async function deleteCategory(id){
+
+ const c=categories.find(x=>x.id===id);
+
+ if(!c)return;
+
+ const used=
+  products.some(p=>p.category_id===id);
+
+ if(used){
+
+  toast(
+   "This category is used by products. Change those products first.",
+   "error"
+  );
+
+  return;
+ }
+
+ if(!confirm(`Delete ${c.name}?`))return;
+
+ const {error}=
+  await supabaseClient
+   .from("categories")
+   .delete()
+   .eq("id",id);
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ await loadCategories();
+
+ toast("Category deleted","success");
+}
+
+/* =====================================================
+   BRANDS
+   ===================================================== */
+
+async function loadBrands(){
+
+ const {data,error}=
+  await supabaseClient
+   .from("brands")
+   .select("*")
+   .order("name",{ascending:true});
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ brands=data||[];
+
+ renderBrands();
+ fillSelects();
+}
+
+function renderBrands(){
+
+ const box=
+  document.getElementById("brandList");
+
+ if(!brands.length){
+  box.innerHTML=
+   `<div class="empty">No brands.</div>`;
+  return;
+ }
+
+ box.innerHTML=brands.map(b=>`
+
+  <div style="
+   display:flex;
+   justify-content:space-between;
+   align-items:center;
+   padding:12px;
+   border-bottom:1px solid #eee">
+
+   <div>
+    <strong>${esc(b.name)}</strong>
+
+    <div class="meta">
+     ${esc(b.description||"")}
+    </div>
+   </div>
+
+   <button class="btn danger"
+    onclick="deleteBrand('${b.id}')">
+    Delete
+   </button>
+
+  </div>
+
+ `).join("");
+}
+
+function openBrand(){
+
+ document.getElementById("brandName").value="";
+ document.getElementById("brandDescription").value="";
+ document.getElementById("brandImage").value="";
+
+ document.getElementById("brandModal")
+  .classList.add("show");
+}
+
+async function saveBrand(){
+
+ const name=
+  document.getElementById("brandName")
+   .value.trim();
+
+ if(!name){
+  toast("Brand name required","error");
+  return;
+ }
+
+ try{
+
+  let logoPath=null;
+
+  const file=
+   document.getElementById("brandImage").files[0];
+
+  if(file){
+
+   const upload=
+    await uploadImage(file,"brands");
+
+   logoPath=upload.path;
+  }
+
+  const {error}=
+   await supabaseClient
+    .from("brands")
+    .insert({
+
+     name,
+
+     description:
+      document.getElementById("brandDescription")
+       .value.trim()||null,
+
+     logo_path:logoPath,
+
+     is_active:true
+    });
+
+  if(error)throw error;
+
+  closeModal("brandModal");
+
+  await loadBrands();
+
+  toast("Brand added","success");
+
+ }catch(e){
+
+  toast(e.message,"error");
+ }
+}
+
+async function deleteBrand(id){
+
+ const b=brands.find(x=>x.id===id);
+
+ if(!b)return;
+
+ const used=
+  products.some(p=>p.brand_id===id);
+
+ if(used){
+
+  toast(
+   "This brand is used by products. Change those products first.",
+   "error"
+  );
+
+  return;
+ }
+
+ if(!confirm(`Delete ${b.name}?`))return;
+
+ const {error}=
+  await supabaseClient
+   .from("brands")
+   .delete()
+   .eq("id",id);
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ await loadBrands();
+
+ toast("Brand deleted","success");
+}
+
+/* =====================================================
+   ORDERS
+   ===================================================== */
+
+async function loadOrders(){
+
+ const {data,error}=
+  await supabaseClient
+   .from("orders")
+   .select("*")
+   .order("created_at",{ascending:false});
+
+ const box=
+  document.getElementById("orders");
+
+ if(error){
+
+  box.innerHTML=
+   `<tr>
+    <td colspan="7">${esc(error.message)}</td>
+   </tr>`;
+
+  return;
+ }
+
+ orders=data||[];
+
+ box.innerHTML=
+  orders.length
+  ?
+  orders.map(o=>`
+
+   <tr>
+
+    <td>
+     <strong>#${o.order_number||short(o.id)}</strong>
+    </td>
+
+    <td>${esc(o.customer_name)}</td>
+
+    <td>${esc(o.customer_phone)}</td>
+
+    <td>
+     ₹${money(o.grand_total)}
+    </td>
+
+    <td>
+
+     <select
+      onchange="orderStatus('${o.id}',this.value)"
+      style="padding:7px">
+
+      ${[
+       "pending",
+       "confirmed",
+       "processing",
+       "shipped",
+       "delivered",
+       "cancelled"
+      ].map(s=>`
+       <option value="${s}"
+        ${o.order_status===s?"selected":""}>
+        ${s}
+       </option>
+      `).join("")}
+
+     </select>
+
+    </td>
+
+    <td>
+     ${esc(o.payment_status)}
+    </td>
+
+    <td>
+     ${date(o.created_at)}
+    </td>
+
+   </tr>
+
+  `).join("")
+  :
+  `<tr>
+   <td colspan="7" class="empty">
+    No orders.
+   </td>
+  </tr>`;
+
+ document.getElementById("cOrders")
+  .textContent=orders.length;
+}
+
+async function orderStatus(id,status){
+
+ const {error}=
+  await supabaseClient
+   .from("orders")
+   .update({
+    order_status:status,
+    updated_at:new Date().toISOString()
+   })
+   .eq("id",id);
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ toast("Order status updated","success");
+
+ await loadOrders();
+}
+
+/* =====================================================
+   PAYMENTS
+   ===================================================== */
+
+async function loadPayments(){
+
+ const {data,error}=
+  await supabaseClient
+   .from("payments")
+   .select("*")
+   .order("created_at",{ascending:false});
+
+ const box=
+  document.getElementById("payments");
+
+ if(error){
+
+  box.innerHTML=
+   `<tr>
+    <td colspan="7">${esc(error.message)}</td>
+   </tr>`;
+
+  return;
+ }
+
+ payments=data||[];
+
+ box.innerHTML=
+  payments.length
+  ?
+  payments.map(p=>`
+
+   <tr>
+
+    <td>${esc(p.customer_id)}</td>
+
+    <td>${short(p.order_id)}</td>
+
+    <td>₹${money(p.amount)}</td>
+
+    <td>${esc(p.method)}</td>
+
+    <td>${esc(p.status)}</td>
+
+    <td>${esc(p.transaction_reference||"-")}</td>
+
+    <td>${date(p.created_at)}</td>
+
+   </tr>
+
+  `).join("")
+  :
+  `<tr>
+   <td colspan="7" class="empty">
+    No payments.
+   </td>
+  </tr>`;
+}
+
+/* =====================================================
+   IMAGE UPLOAD
+   ===================================================== */
+
+async function uploadImage(file,folder){
+
+ if(!file.type.startsWith("image/"))
+  throw new Error("Please select an image.");
+
+ if(file.size>5*1024*1024)
+  throw new Error("Image must be smaller than 5MB.");
+
+ const ext=
+  (file.name.split(".").pop()||"jpg")
+   .toLowerCase()
+   .replace(/[^a-z0-9]/g,"");
+
+ const path=
+  `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+ const {error}=
+  await supabaseClient.storage
+   .from("product-images")
+   .upload(path,file,{
+    cacheControl:"3600",
+    upsert:false
+   });
+
+ if(error)throw error;
+
+ const {data}=
+  supabaseClient.storage
+   .from("product-images")
+   .getPublicUrl(path);
+
+ return {
+  path,
+  url:data.publicUrl
+ };
+}
+
+function preview(event,id){
+
+ const file=event.target.files[0];
+
+ if(!file)return;
+
+ const reader=new FileReader();
+
+ reader.onload=e=>{
+
+  const img=document.getElementById(id);
+
+  img.src=e.target.result;
+  img.style.display="block";
+ };
+
+ reader.readAsDataURL(file);
+}
+
+/* =====================================================
+   DASHBOARD
+   ===================================================== */
+
+function dashboard(){
+
+ document.getElementById("cProducts")
+  .textContent=products.length;
+
+ document.getElementById("cCategories")
+  .textContent=categories.length;
+
+ const low=
+  products.filter(p=>Number(p.stock||0)<=5);
+
+ document.getElementById("cStock")
+  .textContent=low.length;
+
+ const box=
+  document.getElementById("lowStock");
+
+ box.innerHTML=
+  low.length
+  ?
+  low.slice(0,10).map(p=>`
+
+   <div style="
+    padding:11px 0;
+    border-bottom:1px solid #eee;
+    display:flex;
+    justify-content:space-between">
+
+    <strong>${esc(p.name)}</strong>
+
+    <span class="stock ${
+     Number(p.stock||0)<=0?"out":"low"
+    }">
+     ${Number(p.stock||0)} left
+    </span>
+
+   </div>
+
+  `).join("")
+  :
+  `<div class="empty">
+   All products have sufficient stock.
+  </div>`;
+}
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+
+function tab(id,button){
+
+ document.querySelectorAll(".section")
+  .forEach(x=>x.classList.remove("active"));
+
+ document.querySelectorAll(".tab")
+  .forEach(x=>x.classList.remove("active"));
+
+ document.getElementById(id)
+  .classList.add("active");
+
+ button.classList.add("active");
+
+ if(id==="orders")loadOrders();
+ if(id==="payments")loadPayments();
+}
+
+/* =====================================================
+   MODALS
+   ===================================================== */
+
+function closeModal(id){
+
+ document.getElementById(id)
+  .classList.remove("show");
+}
+
+document.querySelectorAll(".modal")
+ .forEach(m=>{
+
+  m.addEventListener("click",e=>{
+
+   if(e.target===m)
+    m.classList.remove("show");
+
+  });
+
+ });
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+
+function money(v){
+
+ return Number(v||0)
+  .toLocaleString("en-IN",{
+   minimumFractionDigits:2,
+   maximumFractionDigits:2
+  });
+}
+
+function date(v){
+
+ if(!v)return"-";
+
+ const d=new Date(v);
+
+ return d.toLocaleString("en-IN",{
+  day:"2-digit",
+  month:"short",
+  year:"numeric",
+  hour:"2-digit",
+  minute:"2-digit"
+ });
+}
+
+function short(v){
+
+ return String(v||"").slice(-8);
+}
+
+function esc(v){
+
+ return String(v??"")
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+}
+
+let toastTimer;
+
+function toast(message,type=""){
+
+ const box=
+  document.getElementById("toast");
+
+ box.textContent=message;
+
+ box.className=
+  "toast show "+type;
+
+ clearTimeout(toastTimer);
+
+ toastTimer=setTimeout(()=>{
+  box.className="toast";
+ },3500);
+}
+
+/* =====================================================
+   AUTH STATE
+   ===================================================== */
+
+supabaseClient.auth.onAuthStateChange(
+ async(event,session)=>{
+
+  if(event==="SIGNED_OUT"){
+   showLogin();
+  }
+
+ }
+);
+
+</script>
+
+</body>
+  </html>
