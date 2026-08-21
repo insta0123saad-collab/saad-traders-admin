@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Customer Store</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#17202a}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.header{background:#087f5b;color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px #0002}
+.head{max-width:1250px;margin:auto;padding:13px 16px;display:flex;align-items:center;gap:15px}
+.logo{font-size:22px;font-weight:900;flex:1}
+.logo small{display:block;font-size:11px;opacity:.85}
+.iconbtn{border:0;border-radius:9px;background:#fff;color:#087f5b;padding:9px 12px;font-weight:800}
+.container{max-width:1250px;margin:auto;padding:14px}
+.hero{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px}
+.hero h1{margin:0 0 7px;font-size:27px}
+.hero p{margin:0;color:#666}
+.search{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;margin-top:15px}
+.cats{display:flex;gap:8px;overflow:auto;margin-bottom:14px}
+.cat{border:0;background:#fff;border-radius:10px;padding:10px 15px;font-weight:700;white-space:nowrap}
+.cat.active{background:#087f5b;color:#fff}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.product{background:#fff;border:1px solid #e5e7eb;border-radius:13px;overflow:hidden}
+.product img,.noimg{width:100%;height:190px;object-fit:contain;background:#fafafa}
+.noimg{display:flex;align-items:center;justify-content:center;color:#aaa}
+.pbody{padding:12px}
+.pname{font-weight:800;line-height:1.3}
+.meta{font-size:12px;color:#777;margin-top:4px}
+.price{font-size:19px;font-weight:900;color:#087f5b;margin-top:8px}
+.mrp{text-decoration:line-through;color:#888;font-size:12px}
+.stock{font-size:11px;font-weight:700;margin-top:7px;display:inline-block;padding:5px 8px;border-radius:6px}
+.ok{background:#dff7ea;color:#087f5b}
+.out{background:#ffe0e0;color:#c0392b}
+.add{width:100%;border:0;background:#087f5b;color:#fff;border-radius:8px;padding:10px;margin-top:10px;font-weight:800}
+.qty{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px}
+.qty button{border:0;background:#e9ecef;border-radius:7px;width:34px;height:34px;font-size:20px;font-weight:900}
+.qty span{font-weight:900}
+.cartbar{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:min(500px,calc(100% - 24px));background:#087f5b;color:#fff;border-radius:13px;padding:13px 16px;z-index:60;display:none;box-shadow:0 5px 25px #0004}
+.cartbar.show{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cartbar button{border:0;background:#fff;color:#087f5b;border-radius:8px;padding:9px 13px;font-weight:900}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:12px;z-index:100}
+.modal.show{display:flex}
+.box{background:#fff;width:min(700px,100%);max-height:94vh;overflow:auto;border-radius:15px;padding:19px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.mhead h2{margin:0}
+.close{border:0;background:#eee;border-radius:50%;width:35px;height:35px;font-size:21px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:13px;font-weight:800}
+.field input,.field textarea,.field select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:8px}
+.field textarea{min-height:75px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+.summary{background:#f7f8f8;border-radius:10px;padding:14px;margin:14px 0}
+.sumrow{display:flex;justify-content:space-between;padding:6px 0}
+.total{font-size:20px;font-weight:900;border-top:1px solid #ddd;padding-top:10px}
+.btn{border:0;border-radius:8px;padding:11px 15px;font-weight:800}
+.primary{background:#087f5b;color:#fff}
+.secondary{background:#e9ecef}
+.danger{background:#d63031;color:#fff}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.cartitem{display:flex;gap:10px;border-bottom:1px solid #eee;padding:11px 0}
+.cartitem img{width:65px;height:65px;object-fit:contain;background:#fafafa;border-radius:7px}
+.ciinfo{flex:1}
+.empty{text-align:center;padding:30px;color:#777}
+.order{border:1px solid #e5e7eb;border-radius:10px;padding:13px;margin-bottom:10px;background:#fff}
+.badge{display:inline-block;background:#e9f6f1;color:#087f5b;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:800}
+.paymentbox{background:#f7f8f8;border-radius:10px;padding:14px;margin-top:12px}
+.qr{max-width:220px;max-height:220px;object-fit:contain;display:block;margin:10px auto}
+.notice{padding:10px;background:#fff3cd;color:#7a5a00;border-radius:8px;font-size:13px;margin-bottom:12px}
+@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){
+ .container{padding:9px}
+ .products{grid-template-columns:repeat(2,1fr);gap:8px}
+ .product img,.noimg{height:145px}
+ .grid{grid-template-columns:1fr}
+ .full{grid-column:auto}
+ .hero h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+ <div class="head">
+  <div class="logo">
+   Saad Traders
+   <small>Quality products at wholesale-friendly prices</small>
+  </div>
+  <button class="iconbtn" onclick="openOrders()">My Orders</button>
+  <button class="iconbtn" onclick="openCart()">Cart <span id="cartCount">0</span></button>
+ </div>
+</header>
+
+<main class="container">
+
+ <div class="hero">
+  <h1 id="businessName">Saad Traders</h1>
+  <p id="businessText">Shop products online and place your order easily.</p>
+  <input id="search" class="search" placeholder="Search products, brands, SKU..." oninput="renderProducts()">
+ </div>
+
+ <div id="categories" class="cats"></div>
+
+ <div id="productList" class="products"></div>
+
+</main>
+
+<div id="cartBar" class="cartbar">
+ <div><strong id="cartItems">0</strong> items · <strong id="cartTotal">₹0.00</strong></div>
+ <button onclick="openCart()">View Cart</button>
+</div>
+
+<!-- CART -->
+<div id="cartModal" class="modal">
+ <div class="box">
+  <div class="mhead">
+   <h2>Your Cart</h2>
+   <button class="close" onclick="closeModal('cartModal')">×</button>
+  </div>
+  <div id="cartList"></div>
+  <div id="cartSummary"></div>
+  <div class="actions">
+   <button class="btn secondary" onclick="closeModal('cartModal')">Continue Shopping</button>
+   <button class="btn primary" onclick="openCheckout()">Checkout</button>
+  </div>
+ </div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkoutModal" class="modal">
+ <div class="box">
+  <div class="mhead">
+   <h2>Checkout</h2>
+   <button class="close" onclick="closeModal('checkoutModal')">×</button>
+  </div>
+
+  <div class="notice">
+   Your order is created through the secure Supabase database function. Stock is handled by the database, not by this webpage.
+  </div>
+
+  <div class="grid">
+   <div class="field">
+    <label>Name *</label>
+    <input id="customerName" required>
+   </div>
+   <div class="field">
+    <label>Phone *</label>
+    <input id="customerPhone" required>
+   </div>
+   <div class="field full">
+    <label>Delivery Address *</label>
+    <textarea id="address" required></textarea>
+   </div>
+   <div class="field">
+    <label>City</label>
+    <input id="city">
+   </div>
+   <div class="field">
+    <label>State</label>
+    <input id="state">
+   </div>
+   <div class="field">
+    <label>Pincode</label>
+    <input id="pincode">
+   </div>
+   <div class="field">
+    <label>GSTIN</label>
+    <input id="gstin">
+   </div>
+   <div class="field full">
+    <label>Order Notes</label>
+    <textarea id="notes"></textarea>
+   </div>
+  </div>
+
+  <div class="summary" id="checkoutSummary"></div>
+
+  <div class="actions">
+   <button class="btn secondary" onclick="closeModal('checkoutModal')">Back</button>
+   <button id="placeBtn" class="btn primary" onclick="placeOrder()">Place Order</button>
+  </div>
+ </div>
+</div>
+
+<!-- ORDER SUCCESS -->
+<div id="successModal" class="modal">
+ <div class="box">
+  <div class="mhead">
+   <h2>Order Placed</h2>
+   <button class="close" onclick="closeModal('successModal')">×</button>
+  </div>
+  <div id="successContent"></div>
+  <div class="actions">
+   <button class="btn primary" onclick="openOrders()">View My Orders</button>
+  </div>
+ </div>
+</div>
+
+<!-- ORDERS -->
+<div id="ordersModal" class="modal">
+ <div class="box">
+  <div class="mhead">
+   <h2>My Orders</h2>
+   <button class="close" onclick="closeModal('ordersModal')">×</button>
+  </div>
+
+  <div class="field">
+   <label>Phone used for order</label>
+   <input id="orderPhone" placeholder="Enter phone number">
+  </div>
+
+  <button class="btn primary" onclick="loadMyOrders()">Find Orders</button>
+  <div id="myOrders" style="margin-top:15px"></div>
+ </div>
+</div>
+
+<!-- PAYMENT -->
+<div id="paymentModal" class="modal">
+ <div class="box">
+  <div class="mhead">
+   <h2>Payment</h2>
+   <button class="close" onclick="closeModal('paymentModal')">×</button>
+  </div>
+  <div id="paymentContent"></div>
+ </div>
+</div>
+
+<div id="toast" style="
+position:fixed;bottom:20px;left:50%;transform:translate(-50%,100px);
+background:#222;color:#fff;padding:12px 18px;border-radius:9px;
+z-index:9999;transition:.25s;text-align:center;max-width:90%">
+</div>
+
+<script>
+const SUPABASE_URL="https://bzyonildigzsytuprfrh.supabase.co";
+const SUPABASE_KEY="sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let products=[];
+let categories=[];
+let brands=[];
+let cart=[];
+let selectedCategory="";
+let paymentSettings=null;
+let lastOrder=null;
+
+document.addEventListener("DOMContentLoaded",async()=>{
+ await loadStore();
+});
+
+async function loadStore(){
+ try{
+  await Promise.all([
+   loadProducts(),
+   loadCategories(),
+   loadBrands(),
+   loadBusiness(),
+   loadPaymentSettings()
+  ]);
+  renderCategories();
+  renderProducts();
+  updateCart();
+ }catch(e){
+  console.error(e);
+  toast(e.message||"Unable to load store.","error");
+ }
+}
+
+async function loadProducts(){
+ const {data,error}=await supabaseClient
+  .from("products")
+  .select("*")
+  .eq("is_active",true)
+  .order("created_at",{ascending:false});
+ if(error)throw error;
+ products=data||[];
+}
+
+async function loadCategories(){
+ const {data,error}=await supabaseClient
+  .from("categories")
+  .select("*")
+  .eq("is_active",true)
+  .order("sort_order",{ascending:true})
+  .order("name",{ascending:true});
+ if(error)throw error;
+ categories=data||[];
+}
+
+async function loadBrands(){
+ const {data,error}=await supabaseClient
+  .from("brands")
+  .select("*")
+  .eq("is_active",true)
+  .order("name",{ascending:true});
+ if(error)throw error;
+ brands=data||[];
+}
+
+async function loadBusiness(){
+ const {data,error}=await supabaseClient
+  .from("business_settings")
+  .select("*")
+  .limit(1)
+  .maybeSingle();
+
+ if(error)return;
+
+ if(data){
+  document.getElementById("businessName").textContent=
+   data.business_name||"Saad Traders";
+
+  document.getElementById("businessText").textContent=
+   data.address
+   ?data.address
+   :"Shop products online and place your order easily.";
+ }
+}
+
+async function loadPaymentSettings(){
+ const {data,error}=await supabaseClient
+  .from("payment_settings")
+  .select("*")
+  .eq("is_active",true)
+  .order("updated_at",{ascending:false})
+  .limit(1)
+  .maybeSingle();
+
+ if(error){
+  paymentSettings=null;
+  return;
+ }
+
+ paymentSettings=data||null;
+}
+
+function renderCategories(){
+ const box=document.getElementById("categories");
+
+ box.innerHTML=
+  `<button class="cat ${selectedCategory===""?"active":""}"
+   onclick="selectCategory('')">All</button>`+
+  categories.map(c=>`
+   <button class="cat ${selectedCategory===c.id?"active":""}"
+    onclick="selectCategory('${c.id}')">
+    ${esc(c.name)}
+   </button>
+  `).join("");
+}
+
+function selectCategory(id){
+ selectedCategory=id;
+ renderCategories();
+ renderProducts();
+}
+
+function renderProducts(){
+ const box=document.getElementById("productList");
+ const q=(document.getElementById("search").value||"").toLowerCase().trim();
+
+ const list=products.filter(p=>{
+  if(selectedCategory && p.category_id!==selectedCategory)return false;
+
+  const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+
+  return [
+   p.name,p.sku,p.size,brand,p.description
+  ].join(" ").toLowerCase().includes(q);
+ });
+
+ if(!list.length){
+  box.innerHTML=`<div class="empty">No products found.</div>`;
+  return;
+ }
+
+ box.innerHTML=list.map(p=>{
+  const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+  const qty=getQty(p.id);
+  const stock=Number(p.stock||0);
+  const unavailable=stock<=0;
+
+  return `
+   <div class="product">
+    ${
+     p.image_url
+     ?`<img src="${esc(p.image_url)}"
+       onerror="this.outerHTML='<div class=noimg>No Image</div>'">`
+     :`<div class="noimg">No Image</div>`
+    }
+
+    <div class="pbody">
+     <div class="pname">${esc(p.name)}</div>
+
+     <div class="meta">
+      ${esc(brand)}
+      ${brand&&p.size?" • ":""}
+      ${esc(p.size||"")}
+     </div>
+
+     ${p.sku?`<div class="meta">SKU: ${esc(p.sku)}</div>`:""}
+
+     <div class="price">₹${money(p.selling_price)}</div>
+
+     ${
+      Number(p.mrp)>Number(p.selling_price)
+      ?`<div class="mrp">MRP ₹${money(p.mrp)}</div>`
+      :""
+     }
+
+     <span class="stock ${unavailable?"out":"ok"}">
+      ${unavailable?"Out of stock":stock+" available"}
+     </span>
+
+     ${
+      unavailable
+      ?`<button class="add" disabled style="opacity:.5">Out of Stock</button>`
+      :qty
+       ?`
+        <div class="qty">
+         <button onclick="changeQty('${p.id}',-1)">−</button>
+         <span>${qty}</span>
+         <button onclick="changeQty('${p.id}',1)">+</button>
+        </div>`
+       :`<button class="add" onclick="addToCart('${p.id}')">Add to Cart</button>`
+     }
+    </div>
+   </div>
+  `;
+ }).join("");
+}
+
+function addToCart(id){
+ const p=products.find(x=>x.id===id);
+ if(!p)return;
+
+ const item=cart.find(x=>x.id===id);
+
+ if(item){
+  if(item.quantity<Number(p.stock||0))item.quantity++;
+ }else{
+  cart.push({
+   id:p.id,
+   quantity:1
+  });
+ }
+
+ saveCart();
+ updateCart();
+ renderProducts();
+}
+
+function changeQty(id,delta){
+ const item=cart.find(x=>x.id===id);
+ const p=products.find(x=>x.id===id);
+
+ if(!item||!p)return;
+
+ item.quantity+=delta;
+
+ if(item.quantity<=0){
+  cart=cart.filter(x=>x.id!==id);
+ }else if(item.quantity>Number(p.stock||0)){
+  item.quantity=Number(p.stock||0);
+ }
+
+ saveCart();
+ updateCart();
+ renderProducts();
+}
+
+function getQty(id){
+ return cart.find(x=>x.id===id)?.quantity||0;
+}
+
+function saveCart(){
+ localStorage.setItem("saad_traders_cart",JSON.stringify(cart));
+}
+
+function updateCart(){
+ const count=cart.reduce((a,b)=>a+b.quantity,0);
+ const total=cart.reduce((sum,item)=>{
+  const p=products.find(x=>x.id===item.id);
+  return sum+(Number(p?.selling_price||0)*item.quantity);
+ },0);
+
+ document.getElementById("cartCount").textContent=count;
+ document.getElementById("cartItems").textContent=count;
+ document.getElementById("cartTotal").textContent="₹"+money(total);
+
+ document.getElementById("cartBar")
+  .classList.toggle("show",count>0);
+}
+
+function openCart(){
+ renderCart();
+ document.getElementById("cartModal").classList.add("show");
+}
+
+function renderCart(){
+ const box=document.getElementById("cartList");
+
+ if(!cart.length){
+  box.innerHTML=`<div class="empty">Your cart is empty.</div>`;
+  document.getElementById("cartSummary").innerHTML="";
+  return;
+ }
+
+ let subtotal=0;
+
+ box.innerHTML=cart.map(item=>{
+  const p=products.find(x=>x.id===item.id);
+  if(!p)return "";
+
+  const line=Number(p.selling_price||0)*item.quantity;
+  subtotal+=line;
+
+  return `
+   <div class="cartitem">
+    ${
+     p.image_url
+     ?`<img src="${esc(p.image_url)}">`
+     :`<div style="width:65px;height:65px;background:#fafafa;border-radius:7px"></div>`
+    }
+    <div class="ciinfo">
+     <strong>${esc(p.name)}</strong>
+     <div class="meta">${esc(p.size||"")}</div>
+     <div>₹${money(p.selling_price)} × ${item.quantity}</div>
+     <div class="qty" style="justify-content:flex-start">
+      <button onclick="changeQty('${p.id}',-1)">−</button>
+      <span>${item.quantity}</span>
+      <button onclick="changeQty('${p.id}',1)">+</button>
+     </div>
+    </div>
+    <strong>₹${money(line)}</strong>
+   </div>
+  `;
+ }).join("");
+
+ document.getElementById("cartSummary").innerHTML=`
+  <div class="summary">
+   <div class="sumrow"><span>Subtotal</span><strong>₹${money(subtotal)}</strong></div>
+   <div class="sumrow total"><span>Total</span><strong>₹${money(subtotal)}</strong></div>
+  </div>
+ `;
+}
+
+function openCheckout(){
+ if(!cart.length){
+  toast("Your cart is empty.","error");
+  return;
+ }
+
+ closeModal("cartModal");
+ renderCheckoutSummary();
+ document.getElementById("checkoutModal").classList.add("show");
+}
+
+function renderCheckoutSummary(){
+ let subtotal=0;
+
+ cart.forEach(item=>{
+  const p=products.find(x=>x.id===item.id);
+  subtotal+=Number(p?.selling_price||0)*item.quantity;
+ });
+
+ document.getElementById("checkoutSummary").innerHTML=`
+  <div class="sumrow"><span>Items</span><strong>${cart.reduce((a,b)=>a+b.quantity,0)}</strong></div>
+  <div class="sumrow"><span>Subtotal</span><strong>₹${money(subtotal)}</strong></div>
+  <div class="sumrow total"><span>Estimated Total</span><strong>₹${money(subtotal)}</strong></div>
+ `;
+}
+
+async function placeOrder(){
+ const name=document.getElementById("customerName").value.trim();
+ const phone=document.getElementById("customerPhone").value.trim();
+ const address=document.getElementById("address").value.trim();
+
+ if(!name||!phone||!address){
+  toast("Name, phone and address are required.","error");
+  return;
+ }
+
+ if(!cart.length){
+  toast("Your cart is empty.","error");
+  return;
+ }
+
+ const btn=document.getElementById("placeBtn");
+ btn.disabled=true;
+ btn.textContent="Placing Order...";
+
+ try{
+  /*
+   IMPORTANT:
+   The database RPC create_customer_order is used here.
+   It is responsible for creating the order and the
+   database triggers handle stock deduction safely.
+  */
+
+  const items=cart.map(item=>{
+   const p=products.find(x=>x.id===item.id);
+
+   return {
+    product_id:p.id,
+    quantity:item.quantity
+   };
+  });
+
+  const {data,error}=await supabaseClient.rpc(
+   "create_customer_order",
+   {
+    p_customer_name:name,
+    p_customer_phone:phone,
+    p_delivery_address:address,
+    p_delivery_city:document.getElementById("city").value.trim()||null,
+    p_delivery_state:document.getElementById("state").value.trim()||null,
+    p_delivery_pincode:document.getElementById("pincode").value.trim()||null,
+    p_customer_gstin:document.getElementById("gstin").value.trim()||null,
+    p_notes:document.getElementById("notes").value.trim()||null,
+    p_freight_charge:0,
+    p_other_charge:0,
+    p_discount:0,
+    p_items:items
+   }
+  );
+
+  if(error)throw error;
+
+  const result=Array.isArray(data)?data[0]:data;
+
+  if(!result?.order_id){
+   throw new Error("Order was not created.");
+  }
+
+  lastOrder=result;
+
+  localStorage.setItem("saad_last_phone",phone);
+
+  cart=[];
+  saveCart();
+  updateCart();
+
+  closeModal("checkoutModal");
+
+  document.getElementById("successContent").innerHTML=`
+   <div class="summary">
+    <div class="sumrow">
+     <span>Order Number</span>
+     <strong>#${esc(result.order_number)}</strong>
+    </div>
+    <div class="sumrow">
+     <span>Total</span>
+     <strong>₹${money(result.grand_total)}</strong>
+    </div>
+    <div style="margin-top:12px;color:#087f5b;font-weight:800">
+     Your order has been successfully submitted.
+    </div>
+   </div>
+
+   <div class="paymentbox">
+    <strong>Payment</strong>
+    <p style="font-size:13px;color:#666">
+     You can complete payment using the payment information
+     configured by Saad Traders.
+    </p>
+    <button class="btn primary" onclick="openPayment('${result.order_id}')">
+     View Payment Information
+    </button>
+   </div>
+  `;
+
+  document.getElementById("successModal").classList.add("show");
+
+  await refreshProducts();
+
+ }catch(e){
+  console.error(e);
+  toast(e.message||"Unable to place order.","error");
+ }finally{
+  btn.disabled=false;
+  btn.textContent="Place Order";
+ }
+}
+
+async function refreshProducts(){
+ try{
+  await loadProducts();
+  renderProducts();
+ }catch(e){}
+}
+
+function openOrders(){
+ closeModal("successModal");
+ closeModal("paymentModal");
+ document.getElementById("orderPhone").value=
+  localStorage.getItem("saad_last_phone")||"";
+ document.getElementById("ordersModal").classList.add("show");
+}
+
+async function loadMyOrders(){
+ const phone=document.getElementById("orderPhone").value.trim();
+ const box=document.getElementById("myOrders");
+
+ if(!phone){
+  toast("Enter the phone number used for the order.","error");
+  return;
+ }
+
+ box.innerHTML=`<div class="empty">Loading...</div>`;
+
+ const {data,error}=await supabaseClient
+  .from("orders")
+  .select("*")
+  .eq("customer_phone",phone)
+  .order("created_at",{ascending:false});
+
+ if(error){
+  box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;
+  return;
+ }
+
+ if(!data?.length){
+  box.innerHTML=`<div class="empty">No orders found.</div>`;
+  return;
+ }
+
+ box.innerHTML=data.map(o=>`
+  <div class="order">
+   <div style="display:flex;justify-content:space-between;gap:8px">
+    <strong>#${esc(o.order_number)}</strong>
+    <span class="badge">${esc(o.order_status)}</span>
+   </div>
+
+   <div class="meta" style="margin-top:8px">
+    ${date(o.created_at)}
+   </div>
+
+   <div style="font-size:19px;font-weight:900;color:#087f5b;margin-top:8px">
+    ₹${money(o.grand_total)}
+   </div>
+
+   <div class="meta">
+    Payment: ${esc(o.payment_status)}
+   </div>
+
+   <div class="actions" style="margin-top:10px">
+    <button class="btn secondary"
+     onclick="openOrderDetails('${o.id}')">
+     Details
+    </button>
+
+    <button class="btn primary"
+     onclick="openPayment('${o.id}')">
+     Payment
+    </button>
+
+    ${
+     ["pending","confirmed"].includes(o.order_status)
+     ?`<button class="btn danger"
+       onclick="cancelOrder('${o.id}')">
+       Cancel
+      </button>`
+     :""
+    }
+   </div>
+  </div>
+ `).join("");
+}
+
+async function openOrderDetails(id){
+ const {data:order,error}=await supabaseClient
+  .from("orders")
+  .select("*")
+  .eq("id",id)
+  .single();
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ const {data:items}=await supabaseClient
+  .from("order_items")
+  .select("*")
+  .eq("order_id",id)
+  .order("created_at",{ascending:true});
+
+ document.getElementById("successContent").innerHTML=`
+  <div class="summary">
+   <div class="sumrow">
+    <span>Order</span>
+    <strong>#${esc(order.order_number)}</strong>
+   </div>
+   <div class="sumrow">
+    <span>Status</span>
+    <strong>${esc(order.order_status)}</strong>
+   </div>
+   <div class="sumrow">
+    <span>Payment</span>
+    <strong>${esc(order.payment_status)}</strong>
+   </div>
+   <div class="sumrow total">
+    <span>Total</span>
+    <strong>₹${money(order.grand_total)}</strong>
+   </div>
+  </div>
+
+  <h3>Items</h3>
+
+  ${
+   (items||[]).map(i=>`
+    <div class="cartitem">
+     <div class="ciinfo">
+      <strong>${esc(i.product_name)}</strong>
+      <div class="meta">
+       ${i.quantity} ${esc(i.unit)}
+       × ₹${money(i.unit_price)}
+      </div>
+     </div>
+     <strong>₹${money(i.line_total)}</strong>
+    </div>
+   `).join("")
+  }
+ `;
+
+ closeModal("ordersModal");
+ document.getElementById("successModal").classList.add("show");
+}
+
+async function cancelOrder(id){
+ if(!confirm("Cancel this order?"))return;
+
+ const {data,error}=await supabaseClient.rpc(
+  "cancel_my_order",
+  {p_order_id:id}
+ );
+
+ if(error){
+  toast(error.message,"error");
+  return;
+ }
+
+ if(data!==true){
+  toast("This order cannot be cancelled.","error");
+  return;
+ }
+
+ toast("Order cancelled.","success");
+ await loadMyOrders();
+}
+
+async function openPayment(orderId){
+ closeModal("successModal");
+
+ if(!paymentSettings){
+  await loadPaymentSettings();
+ }
+
+ let html=`
+  <div class="notice">
+   Payment information is controlled from the Saad Traders admin/database settings.
+  </div>
+ `;
+
+ if(paymentSettings){
+  if(paymentSettings.upi_id){
+   html+=`
+    <div class="paymentbox">
+     <strong>UPI ID</strong>
+     <div style="font-size:18px;font-weight:900;margin-top:6px">
+      ${esc(paymentSettings.upi_id)}
+     </div>
+    </div>
+   `;
+  }
+
+  if(paymentSettings.qr_image_path){
+   const url=getStorageUrl(paymentSettings.qr_image_path);
+
+   if(url){
+    html+=`
+     <div class="paymentbox">
+      <strong>Scan QR</strong>
+      <img class="qr" src="${esc(url)}">
+     </div>
+    `;
+   }
+  }
+
+  if(paymentSettings.account_holder||
+     paymentSettings.bank_name||
+     paymentSettings.account_number||
+     paymentSettings.ifsc_code||
+     paymentSettings.branch_name){
+
+   html+=`
+    <div class="paymentbox">
+     <strong>Bank Details</strong>
+
+     ${
+      paymentSettings.account_holder
+      ?`<p>Account Holder: ${esc(paymentSettings.account_holder)}</p>`:""
+     }
+
+     ${
+      paymentSettings.bank_name
+      ?`<p>Bank: ${esc(paymentSettings.bank_name)}</p>`:""
+     }
+
+     ${
+      paymentSettings.account_number
+      ?`<p>Account Number: ${esc(paymentSettings.account_number)}</p>`:""
+     }
+
+     ${
+      paymentSettings.ifsc_code
+      ?`<p>IFSC: ${esc(paymentSettings.ifsc_code)}</p>`:""
+     }
+
+     ${
+      paymentSettings.branch_name
+      ?`<p>Branch: ${esc(paymentSettings.branch_name)}</p>`:""
+     }
+    </div>
+   `;
+  }
+
+  if(paymentSettings.payment_instructions){
+   html+=`
+    <div class="paymentbox">
+     <strong>Instructions</strong>
+     <p>${esc(paymentSettings.payment_instructions)}</p>
+    </div>
+   `;
+  }
+ }else{
+  html+=`
+   <div class="empty">
+    Payment information has not been configured yet.
+   </div>
+  `;
+ }
+
+ html+=`
+  <div class="paymentbox">
+   <h3>Submit Payment Claim</h3>
+
+   <div class="field">
+    <label>Payment Method</label>
+    <select id="payMethod">
+     <option value="upi">UPI</option>
+     <option value="bank_transfer">Bank Transfer</option>
+     <option value="cash">Cash</option>
+     <option value="other">Other</option>
+    </select>
+   </div>
+
+   <div class="field">
+    <label>Transaction Reference</label>
+    <input id="payReference" placeholder="Optional transaction ID">
+   </div>
+
+   <div class="field">
+    <label>Payment Screenshot</label>
+    <input id="payScreenshot" type="file" accept="image/*">
+   </div>
+
+   <button class="btn primary" onclick="submitPayment('${orderId}')">
+    Submit Payment
+   </button>
+  </div>
+ `;
+
+ document.getElementById("paymentContent").innerHTML=html;
+ document.getElementById("paymentModal").classList.add("show");
+}
+
+async function submitPayment(orderId){
+ const method=document.getElementById("payMethod").value;
+ const reference=document.getElementById("payReference").value.trim();
+ const file=document.getElementById("payScreenshot").files[0];
+
+ let screenshotPath=null;
+
+ try{
+  if(file){
+   if(!file.type.startsWith("image/"))
+    throw new Error("Screenshot must be an image.");
+
+   if(file.size>5*1024*1024)
+    throw new Error("Screenshot must be smaller than 5MB.");
+
+   const ext=(file.name.split(".").pop()||"jpg")
+    .toLowerCase().replace(/[^a-z0-9]/g,"");
+
+   const path=`payment-proofs/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+   const {error}=await supabaseClient.storage
+    .from("product-images")
+    .upload(path,file,{cacheControl:"3600",upsert:false});
+
+   if(error)throw error;
+
+   screenshotPath=path;
+  }
+
+  const {data,error}=await supabaseClient.rpc(
+   "submit_payment_claim",
+   {
+    p_order_id:orderId,
+    p_method:method,
+    p_transaction_reference:reference||null,
+    p_screenshot_path:screenshotPath
+   }
+  );
+
+  if(error)throw error;
+
+  toast("Payment claim submitted.","success");
+  closeModal("paymentModal");
+
+ }catch(e){
+  toast(e.message||"Unable to submit payment.","error");
+ }
+}
+
+function getStorageUrl(path){
+ if(!path)return null;
+
+ return supabaseClient.storage
+  .from("product-images")
+  .getPublicUrl(path).data.publicUrl;
+}
+
+function closeModal(id){
+ document.getElementById(id).classList.remove("show");
+}
+
+document.querySelectorAll(".modal").forEach(m=>{
+ m.addEventListener("click",e=>{
+  if(e.target===m)m.classList.remove("show");
+ });
+});
+
+function money(v){
+ return Number(v||0).toLocaleString("en-IN",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
+
+function date(v){
+ if(!v)return"-";
+
+ return new Date(v).toLocaleString("en-IN",{
+  day:"2-digit",
+  month:"short",
+  year:"numeric",
+  hour:"2-digit",
+  minute:"2-digit"
+ });
+}
+
+function esc(v){
+ return String(v??"")
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+}
+
+let toastTimer;
+
+function toast(message,type=""){
+ const box=document.getElementById("toast");
+
+ box.textContent=message;
+ box.style.background=type==="error"?"#d63031":"#087f5b";
+ box.style.transform="translate(-50%,0)";
+
+ clearTimeout(toastTimer);
+
+ toastTimer=setTimeout(()=>{
+  box.style.transform="translate(-50%,100px)";
+ },3200);
+}
+
+try{
+ const saved=JSON.parse(
+  localStorage.getItem("saad_traders_cart")||"[]"
+ );
+
+ if(Array.isArray(saved))cart=saved;
+}catch(e){
+ cart=[];
+}
+</script>
+</body>
+</html>
