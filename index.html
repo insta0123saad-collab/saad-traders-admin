@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<title>Saad Traders — Admin Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#17202a}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.header{background:#087f5b;color:#fff;padding:14px;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px #0002}
+.head{max-width:1250px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.logo{font-size:22px;font-weight:800}.logo small{display:block;font-size:11px;opacity:.8}
+.container{max-width:1250px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}
+.tab{border:0;background:#fff;border-radius:9px;padding:11px 15px;font-weight:700;white-space:nowrap}
+.tab.active{background:#087f5b;color:#fff}
+.section{display:none}.section.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.card{background:#fff;padding:17px;border-radius:12px;border:1px solid #e5e7eb}
+.card small{color:#777}.num{font-size:28px;font-weight:800;margin-top:7px}
+.panel{background:#fff;border-radius:12px;padding:18px;border:1px solid #e5e7eb;margin-bottom:16px}
+.panelhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.panel h2{font-size:19px;margin:0}
+.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:700}
+.primary{background:#087f5b;color:#fff}.secondary{background:#e9ecef}.danger{background:#d63031;color:#fff}.warning{background:#f39c12;color:#fff}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.search{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
+.field label{font-size:13px;font-weight:700}
+.field input,.field select,.field textarea{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:11px;background:#fff;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#087f5b;box-shadow:0 0 0 2px #087f5b18}
+.field textarea{min-height:80px;resize:vertical}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.product{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+.product img{width:100%;height:180px;object-fit:contain;background:#fafafa}
+.noimg{height:180px;display:flex;justify-content:center;align-items:center;color:#aaa;background:#fafafa}
+.pbody{padding:12px}.pname{font-weight:800}.meta{font-size:12px;color:#777;margin-top:4px}
+.price{color:#087f5b;font-size:18px;font-weight:800;margin-top:8px}
+.actions{display:flex;gap:7px;margin-top:10px}.actions button{flex:1;border:0;padding:8px;border-radius:7px;font-size:12px;font-weight:700}
+.stock{display:inline-block;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-top:7px}
+.ok{background:#dff7ea;color:#087f5b}.low{background:#fff3cd;color:#8a6700}.out{background:#ffe0e0;color:#c0392b}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;font-size:13px}th{background:#f7f8f8}
+.modal{position:fixed;inset:0;background:#0008;display:none;justify-content:center;align-items:center;padding:15px;z-index:100}
+.modal.show{display:flex}.modalbox{background:#fff;width:min(720px,100%);max-height:94vh;overflow:auto;border-radius:14px;padding:20px}
+.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.close{border:0;background:#eee;width:34px;height:34px;border-radius:50%;font-size:20px}
+.formactions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.preview{width:130px;height:130px;object-fit:contain;border:1px solid #ddd;border-radius:8px;display:none;margin-top:10px}
+.login{position:fixed;inset:0;background:#f4f6f8;z-index:999;display:flex;justify-content:center;align-items:center;padding:20px}
+.loginbox{width:min(420px,100%);background:#fff;padding:25px;border-radius:15px;box-shadow:0 5px 30px #0002}
+.loginbox h1{margin-top:0}.loginbox input{width:100%;padding:12px;margin:7px 0 12px;border:1px solid #ddd;border-radius:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,100px);background:#222;color:#fff;padding:12px 18px;border-radius:9px;z-index:9999;transition:.25s;text-align:center;max-width:90%}
+.toast.show{transform:translate(-50%,0)}.toast.success{background:#087f5b}.toast.error{background:#d63031}
+.empty{padding:30px;text-align:center;color:#777}
+.badge{display:inline-block;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#e9ecef}
+.details{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.detail{background:#f7f8f8;padding:10px;border-radius:8px}.detail b{display:block;font-size:11px;color:#777;margin-bottom:3px}
+@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.container{padding:10px}.products{grid-template-columns:repeat(2,1fr);gap:8px}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.product img,.noimg{height:140px}.cards{gap:8px}.card{padding:13px}.num{font-size:23px}.details{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<div id="login" class="login">
+<div class="loginbox">
+<h1>Saad Traders</h1>
+<p>Admin Panel Login</p>
+<input id="email" type="email" placeholder="Admin email" autocomplete="username">
+<input id="password" type="password" placeholder="Password" autocomplete="current-password">
+<button id="loginBtn" class="btn primary" style="width:100%" onclick="login()">Login</button>
+<p id="loginError" style="color:#d63031;font-size:13px"></p>
+</div>
+</div>
+
+<header class="header">
+<div class="head">
+<div class="logo">Saad Traders<small>Business Admin Panel</small></div>
+<button class="btn secondary" onclick="logout()">Logout</button>
+</div>
+</header>
+
+<main class="container">
+
+<div class="tabs">
+<button class="tab active" onclick="tab('dashboard',this)">Dashboard</button>
+<button class="tab" onclick="tab('products',this)">Products</button>
+<button class="tab" onclick="tab('categories',this)">Categories</button>
+<button class="tab" onclick="tab('brands',this)">Brands</button>
+<button class="tab" onclick="tab('orders',this)">Orders</button>
+<button class="tab" onclick="tab('payments',this)">Payments</button>
+</div>
+
+<section id="dashboard" class="section active">
+<div class="cards">
+<div class="card"><small>Total Products</small><div id="cProducts" class="num">0</div></div>
+<div class="card"><small>Categories</small><div id="cCategories" class="num">0</div></div>
+<div class="card"><small>Low Stock</small><div id="cStock" class="num">0</div></div>
+<div class="card"><small>Total Orders</small><div id="cOrders" class="num">0</div></div>
+</div>
+
+<div class="panel">
+<div class="panelhead"><h2>Quick Actions</h2></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn primary" onclick="openProduct()">+ Add Product</button>
+<button class="btn secondary" onclick="openCategory()">+ Category</button>
+<button class="btn secondary" onclick="openBrand()">+ Brand</button>
+</div>
+</div>
+
+<div class="panel">
+<h2>Low Stock Products</h2>
+<div id="lowStock"></div>
+</div>
+</section>
+
+<section id="products" class="section">
+<div class="panel">
+<div class="panelhead">
+<h2>Products</h2>
+<button class="btn primary" onclick="openProduct()">+ Add Product</button>
+</div>
+<input id="search" class="search" placeholder="Search product, brand, SKU..." oninput="renderProducts()">
+<div id="productList" class="products"></div>
+</div>
+</section>
+
+<section id="categories" class="section">
+<div class="panel">
+<div class="panelhead">
+<h2>Categories</h2>
+<button class="btn primary" onclick="openCategory()">+ Add Category</button>
+</div>
+<div id="categoryList"></div>
+</div>
+</section>
+
+<section id="brands" class="section">
+<div class="panel">
+<div class="panelhead">
+<h2>Brands</h2>
+<button class="btn primary" onclick="openBrand()">+ Add Brand</button>
+</div>
+<div id="brandList"></div>
+</div>
+</section>
+
+<section id="orders" class="section">
+<div class="panel">
+<div class="panelhead">
+<h2>Customer Orders</h2>
+<button class="btn secondary" onclick="loadOrders()">Refresh</button>
+</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Order</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Payment</th><th>Date</th><th>View</th></tr></thead>
+<tbody id="orders"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section id="payments" class="section">
+<div class="panel">
+<div class="panelhead">
+<h2>Payments</h2>
+<button class="btn secondary" onclick="loadPayments()">Refresh</button>
+</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Customer</th><th>Order</th><th>Amount</th><th>Method</th><th>Status</th><th>Reference</th><th>Date</th></tr></thead>
+<tbody id="payments"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+</main>
+
+<div id="productModal" class="modal">
+<div class="modalbox">
+<div class="modalhead"><h2 id="productTitle">Add Product</h2><button class="close" onclick="closeModal('productModal')">×</button></div>
+<input type="hidden" id="productId">
+
+<div class="grid">
+<div class="field full"><label>Product Name *</label><input id="pName" placeholder="Fortune Soya Oil"></div>
+
+<div class="field"><label>Brand</label><select id="pBrand"><option value="">Select brand</option></select></div>
+<div class="field"><label>Category</label><select id="pCategory"><option value="">Select category</option></select></div>
+
+<div class="field"><label>Size</label><input id="pSize" placeholder="500ml / 1L / 5L"></div>
+<div class="field"><label>Unit</label><select id="pUnit">
+<option value="piece">Piece</option><option value="kg">Kg</option><option value="gram">Gram</option><option value="litre">Litre</option><option value="ml">ML</option><option value="pack">Pack</option>
+</select></div>
+
+<div class="field"><label>SKU</label><input id="pSku" placeholder="Optional SKU"></div>
+<div class="field"><label>Purchase Price ₹</label><input id="pPurchase" type="number" min="0" step="0.01"></div>
+<div class="field"><label>Selling Price ₹ *</label><input id="pSelling" type="number" min="0" step="0.01"></div>
+<div class="field"><label>MRP ₹</label><input id="pMrp" type="number" min="0" step="0.01"></div>
+<div class="field"><label>Stock</label><input id="pStock" type="number" min="0" value="0"></div>
+<div class="field"><label>GST %</label><input id="pGst" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label>Labour Charge ₹</label><input id="pLabour" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label>Bori/Pati Charge ₹</label><input id="pBori" type="number" min="0" step="0.01" value="0"></div>
+
+<div class="field full"><label>Description</label><textarea id="pDescription"></textarea></div>
+
+<div class="field full">
+<label>Product Image</label>
+<input id="pImage" type="file" accept="image/*" onchange="preview(event,'pPreview')">
+<img id="pPreview" class="preview">
+</div>
+
+<div><label><input id="pActive" type="checkbox" checked> Visible to customers</label></div>
+</div>
+
+<div class="formactions">
+<button class="btn secondary" onclick="closeModal('productModal')">Cancel</button>
+<button id="saveProductBtn" class="btn primary" onclick="saveProduct()">Save Product</button>
+</div>
+</div>
+</div>
+
+<div id="categoryModal" class="modal">
+<div class="modalbox">
+<div class="modalhead"><h2 id="categoryTitle">Add Category</h2><button class="close" onclick="closeModal('categoryModal')">×</button></div>
+<input type="hidden" id="categoryId">
+
+<div class="field"><label>Category Name *</label><input id="catName" placeholder="Cooking Oil"></div>
+<div class="field" style="margin-top:12px"><label>Description</label><textarea id="catDescription"></textarea></div>
+<div class="field" style="margin-top:12px"><label>Category Image</label><input id="catImage" type="file" accept="image/*" onchange="preview(event,'catPreview')"><img id="catPreview" class="preview"></div>
+
+<div class="formactions">
+<button class="btn secondary" onclick="closeModal('categoryModal')">Cancel</button>
+<button id="saveCategoryBtn" class="btn primary" onclick="saveCategory()">Save Category</button>
+</div>
+</div>
+</div>
+
+<div id="brandModal" class="modal">
+<div class="modalbox">
+<div class="modalhead"><h2 id="brandTitle">Add Brand</h2><button class="close" onclick="closeModal('brandModal')">×</button></div>
+<input type="hidden" id="brandId">
+
+<div class="field"><label>Brand Name *</label><input id="brandName" placeholder="Fortune"></div>
+<div class="field" style="margin-top:12px"><label>Description</label><textarea id="brandDescription"></textarea></div>
+<div class="field" style="margin-top:12px"><label>Brand Logo</label><input id="brandImage" type="file" accept="image/*" onchange="preview(event,'brandPreview')"><img id="brandPreview" class="preview"></div>
+
+<div class="formactions">
+<button class="btn secondary" onclick="closeModal('brandModal')">Cancel</button>
+<button id="saveBrandBtn" class="btn primary" onclick="saveBrand()">Save Brand</button>
+</div>
+</div>
+</div>
+
+<div id="orderModal" class="modal">
+<div class="modalbox">
+<div class="modalhead"><h2>Order Details</h2><button class="close" onclick="closeModal('orderModal')">×</button></div>
+<div id="orderDetails"></div>
+<div class="formactions"><button class="btn secondary" onclick="closeModal('orderModal')">Close</button></div>
+</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL="https://bzyonildigzsytuprfrh.supabase.co";
+const SUPABASE_KEY="sb_publishable_bHzySPhRmTgA_2gaSdeaNw_KdMq-hBL";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let products=[],categories=[],brands=[],orders=[],payments=[],editingProduct=null,editingCategory=null,editingBrand=null;
+let toastTimer;
+
+document.addEventListener("DOMContentLoaded",init);
+
+async function init(){
+try{
+const {data:{session}}=await supabaseClient.auth.getSession();
+if(session){
+if(await checkAdmin()){showAdmin();await loadAll();}
+else{await supabaseClient.auth.signOut();showLogin();}
+}else showLogin();
+}catch(e){console.error(e);showLogin();toast("Unable to initialize admin panel","error")}
+}
+
+async function login(){
+const email=document.getElementById("email").value.trim();
+const password=document.getElementById("password").value;
+const error=document.getElementById("loginError");
+const btn=document.getElementById("loginBtn");
+error.textContent="";
+if(!email||!password){error.textContent="Enter email and password.";return}
+btn.disabled=true;btn.textContent="Logging in...";
+try{
+const {error:e}=await supabaseClient.auth.signInWithPassword({email,password});
+if(e)throw e;
+if(!await checkAdmin()){await supabaseClient.auth.signOut();throw new Error("This account is not an admin.")}
+showAdmin();await loadAll();
+}catch(e){error.textContent=e.message||"Login failed."}
+finally{btn.disabled=false;btn.textContent="Login"}
+}
+
+async function checkAdmin(){
+try{
+const {data,error}=await supabaseClient.rpc("is_admin");
+if(error){console.error("is_admin:",error);return false}
+return data===true;
+}catch(e){console.error(e);return false}
+}
+
+async function logout(){await supabaseClient.auth.signOut();showLogin()}
+function showLogin(){document.getElementById("login").style.display="flex"}
+function showAdmin(){document.getElementById("login").style.display="none"}
+
+async function loadAll(){
+await Promise.all([loadProducts(),loadCategories(),loadBrands(),loadOrders(),loadPayments()]);
+dashboard();
+}
+
+async function loadProducts(){
+const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});
+if(error){toast(error.message,"error");return}
+products=data||[];renderProducts();dashboard();
+}
+
+function renderProducts(){
+const box=document.getElementById("productList");
+const search=(document.getElementById("search")?.value||"").toLowerCase().trim();
+const list=products.filter(p=>{
+const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+const category=categories.find(c=>c.id===p.category_id)?.name||"";
+return [p.name,p.sku,p.size,brand,category].join(" ").toLowerCase().includes(search);
+});
+if(!list.length){box.innerHTML='<div class="empty">No products found.</div>';return}
+box.innerHTML=list.map(p=>{
+const brand=brands.find(b=>b.id===p.brand_id)?.name||"";
+const category=categories.find(c=>c.id===p.category_id)?.name||"";
+const stock=Number(p.stock||0);
+const cls=stock<=0?"out":stock<=5?"low":"ok";
+return `<div class="product">
+${p.image_url?`<img src="${esc(p.image_url)}" onerror="this.outerHTML='<div class=noimg>Image unavailable</div>'">`:`<div class="noimg">No Image</div>`}
+<div class="pbody">
+<div class="pname">${esc(p.name)}</div>
+<div class="meta">${esc(brand)}${brand&&category?" • ":""}${esc(category)}</div>
+<div class="meta">${esc(p.size||"")}${p.sku?" • SKU: "+esc(p.sku):""}</div>
+<div class="price">₹${money(p.selling_price)}</div>
+${p.mrp?`<div class="meta">MRP ₹${money(p.mrp)}</div>`:""}
+<span class="stock ${cls}">${stock<=0?"Out of stock":stock+" in stock"}</span>
+${p.is_active===false?'<span class="stock out">Hidden</span>':''}
+<div class="actions">
+<button style="background:#e5f5ef;color:#087f5b" onclick="editProduct('${p.id}')">Edit</button>
+<button style="background:#ffe5e5;color:#d63031" onclick="deleteProduct('${p.id}')">Delete</button>
+</div>
+</div></div>`;
+}).join("");
+}
+
+function resetProductForm(){
+editingProduct=null;
+document.getElementById("productTitle").textContent="Add Product";
+document.getElementById("productId").value="";
+["pName","pSize","pSku","pPurchase","pSelling","pMrp","pDescription"].forEach(id=>document.getElementById(id).value="");
+document.getElementById("pStock").value="0";
+document.getElementById("pGst").value="0";
+document.getElementById("pLabour").value="0";
+document.getElementById("pBori").value="0";
+document.getElementById("pUnit").value="piece";
+document.getElementById("pActive").checked=true;
+document.getElementById("pImage").value="";
+hidePreview("pPreview");
+}
+
+function openProduct(){
+resetProductForm();
+fillSelects();
+document.getElementById("productModal").classList.add("show");
+}
+
+function fillSelects(selectedBrand="",selectedCategory=""){
+document.getElementById("pBrand").innerHTML='<option value="">Select brand</option>'+brands.map(b=>`<option value="${esc(b.id)}" ${b.id===selectedBrand?"selected":""}>${esc(b.name)}</option>`).join("");
+document.getElementById("pCategory").innerHTML='<option value="">Select category</option>'+categories.map(c=>`<option value="${esc(c.id)}" ${c.id===selectedCategory?"selected":""}>${esc(c.name)}</option>`).join("");
+}
+
+function editProduct(id){
+const p=products.find(x=>x.id===id);if(!p)return;
+editingProduct=p;
+document.getElementById("productTitle").textContent="Edit Product";
+document.getElementById("productId").value=p.id;
+document.getElementById("pName").value=p.name||"";
+document.getElementById("pSize").value=p.size||"";
+document.getElementById("pSku").value=p.sku||"";
+document.getElementById("pPurchase").value=p.purchase_price??"";
+document.getElementById("pSelling").value=p.selling_price??"";
+document.getElementById("pMrp").value=p.mrp??"";
+document.getElementById("pStock").value=p.stock??0;
+document.getElementById("pGst").value=p.gst_rate??0;
+document.getElementById("pLabour").value=p.labour_charge??0;
+document.getElementById("pBori").value=p.bori_pati_charge??0;
+document.getElementById("pUnit").value=p.unit||"piece";
+document.getElementById("pDescription").value=p.description||"";
+document.getElementById("pActive").checked=p.is_active!==false;
+document.getElementById("pImage").value="";
+fillSelects(p.brand_id||"",p.category_id||"");
+if(p.image_url){const img=document.getElementById("pPreview");img.src=p.image_url;img.style.display="block"}else hidePreview("pPreview");
+document.getElementById("productModal").classList.add("show");
+}
+
+async function saveProduct(){
+const btn=document.getElementById("saveProductBtn");btn.disabled=true;btn.textContent="Saving...";
+try{
+const name=document.getElementById("pName").value.trim();
+const selling=Number(document.getElementById("pSelling").value||0);
+if(!name)throw new Error("Product name is required.");
+if(selling<=0)throw new Error("Selling price is required.");
+let imageUrl=editingProduct?.image_url||null,imagePath=editingProduct?.image_path||null;
+const file=document.getElementById("pImage").files[0];
+if(file){const u=await uploadImage(file,"products");imageUrl=u.url;imagePath=u.path}
+const row={
+name,
+brand_id:document.getElementById("pBrand").value||null,
+category_id:document.getElementById("pCategory").value||null,
+size:document.getElementById("pSize").value.trim()||null,
+sku:document.getElementById("pSku").value.trim()||null,
+unit:document.getElementById("pUnit").value,
+purchase_price:Number(document.getElementById("pPurchase").value||0),
+selling_price:selling,
+mrp:Number(document.getElementById("pMrp").value||0),
+stock:Number(document.getElementById("pStock").value||0),
+gst_rate:Number(document.getElementById("pGst").value||0),
+labour_charge:Number(document.getElementById("pLabour").value||0),
+bori_pati_charge:Number(document.getElementById("pBori").value||0),
+description:document.getElementById("pDescription").value.trim()||null,
+image_url:imageUrl,image_path:imagePath,is_active:document.getElementById("pActive").checked
+};
+let error;
+if(editingProduct)({error}=await supabaseClient.from("products").update(row).eq("id",editingProduct.id));
+else({error}=await supabaseClient.from("products").insert(row));
+if(error)throw error;
+closeModal("productModal");toast(editingProduct?"Product updated":"Product added","success");await loadProducts();
+}catch(e){console.error(e);toast(e.message||"Unable to save product","error")}
+finally{btn.disabled=false;btn.textContent="Save Product"}
+}
+
+async function deleteProduct(id){
+const p=products.find(x=>x.id===id);if(!p)return;
+if(!confirm(`Delete "${p.name}"?\n\nThis cannot be undone.`))return;
+const {error}=await supabaseClient.from("products").delete().eq("id",id);
+if(error){toast(error.message,"error");return}
+products=products.filter(x=>x.id!==id);renderProducts();dashboard();toast("Product deleted","success");
+}
+
+async function loadCategories(){
+const {data,error}=await supabaseClient.from("categories").select("*").order("sort_order",{ascending:true}).order("name",{ascending:true});
+if(error){toast(error.message,"error");return}
+categories=data||[];renderCategories();fillSelects();dashboard();
+}
+
+function renderCategories(){
+const box=document.getElementById("categoryList");
+if(!categories.length){box.innerHTML='<div class="empty">No categories.</div>';return}
+box.innerHTML=categories.map(c=>`
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #eee">
+<div style="display:flex;align-items:center;gap:12px">
+${c.image_url?`<img src="${esc(c.image_url)}" style="width:50px;height:50px;object-fit:contain;border-radius:8px;border:1px solid #eee">`:""}
+<div><strong>${esc(c.name)}</strong><div class="meta">${esc(c.description||"")}</div></div>
+</div>
+<div style="display:flex;gap:6px"><button class="btn secondary" onclick="editCategory('${c.id}')">Edit</button><button class="btn danger" onclick="deleteCategory('${c.id}')">Delete</button></div>
+</div>`).join("");
+}
+
+function resetCategoryForm(){
+editingCategory=null;
+document.getElementById("categoryTitle").textContent="Add Category";
+document.getElementById("categoryId").value="";
+document.getElementById("catName").value="";
+document.getElementById("catDescription").value="";
+document.getElementById("catImage").value="";
+hidePreview("catPreview");
+}
+
+function openCategory(){resetCategoryForm();document.getElementById("categoryModal").classList.add("show")}
+
+function editCategory(id){
+const c=categories.find(x=>x.id===id);if(!c)return;
+editingCategory=c;
+document.getElementById("categoryTitle").textContent="Edit Category";
+document.getElementById("categoryId").value=id;
+document.getElementById("catName").value=c.name||"";
+document.getElementById("catDescription").value=c.description||"";
+document.getElementById("catImage").value="";
+if(c.image_url){const img=document.getElementById("catPreview");img.src=c.image_url;img.style.display="block"}else hidePreview("catPreview");
+document.getElementById("categoryModal").classList.add("show");
+}
+
+async function saveCategory(){
+const btn=document.getElementById("saveCategoryBtn");btn.disabled=true;btn.textContent="Saving...";
+try{
+const name=document.getElementById("catName").value.trim();if(!name)throw new Error("Category name required.");
+let imageUrl=editingCategory?.image_url||null,imagePath=editingCategory?.image_path||null;
+const file=document.getElementById("catImage").files[0];
+if(file){const u=await uploadImage(file,"categories");imageUrl=u.url;imagePath=u.path}
+const row={name,description:document.getElementById("catDescription").value.trim()||null,image_url:imageUrl,image_path:imagePath,is_active:true,sort_order:editingCategory?.sort_order??categories.length};
+let error;
+if(editingCategory)({error}=await supabaseClient.from("categories").update(row).eq("id",editingCategory.id));
+else({error}=await supabaseClient.from("categories").insert(row));
+if(error)throw error;
+closeModal("categoryModal");await loadCategories();toast(editingCategory?"Category updated":"Category added","success");
+}catch(e){toast(e.message,"error")}
+finally{btn.disabled=false;btn.textContent="Save Category"}
+}
+
+async function deleteCategory(id){
+const c=categories.find(x=>x.id===id);if(!c)return;
+if(products.some(p=>p.category_id===id)){toast("This category is used by products. Change those products first.","error");return}
+if(!confirm(`Delete ${c.name}?`))return;
+const {error}=await supabaseClient.from("categories").delete().eq("id",id);
+if(error){toast(error.message,"error");return}
+await loadCategories();toast("Category deleted","success");
+}
+
+async function loadBrands(){
+const {data,error}=await supabaseClient.from("brands").select("*").order("name",{ascending:true});
+if(error){toast(error.message,"error");return}
+brands=data||[];renderBrands();fillSelects();
+}
+
+function renderBrands(){
+const box=document.getElementById("brandList");
+if(!brands.length){box.innerHTML='<div class="empty">No brands.</div>';return}
+box.innerHTML=brands.map(b=>`
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #eee">
+<div style="display:flex;align-items:center;gap:12px">
+${b.logo_url?`<img src="${esc(b.logo_url)}" style="width:50px;height:50px;object-fit:contain;border-radius:8px;border:1px solid #eee">`:""}
+<div><strong>${esc(b.name)}</strong><div class="meta">${esc(b.description||"")}</div></div>
+</div>
+<div style="display:flex;gap:6px"><button class="btn secondary" onclick="editBrand('${b.id}')">Edit</button><button class="btn danger" onclick="deleteBrand('${b.id}')">Delete</button></div>
+</div>`).join("");
+}
+
+function resetBrandForm(){
+editingBrand=null;
+document.getElementById("brandTitle").textContent="Add Brand";
+document.getElementById("brandId").value="";
+document.getElementById("brandName").value="";
+document.getElementById("brandDescription").value="";
+document.getElementById("brandImage").value="";
+hidePreview("brandPreview");
+}
+
+function openBrand(){resetBrandForm();document.getElementById("brandModal").classList.add("show")}
+
+function editBrand(id){
+const b=brands.find(x=>x.id===id);if(!b)return;
+editingBrand=b;
+document.getElementById("brandTitle").textContent="Edit Brand";
+document.getElementById("brandId").value=id;
+document.getElementById("brandName").value=b.name||"";
+document.getElementById("brandDescription").value=b.description||"";
+document.getElementById("brandImage").value="";
+if(b.logo_url){const img=document.getElementById("brandPreview");img.src=b.logo_url;img.style.display="block"}else hidePreview("brandPreview");
+document.getElementById("brandModal").classList.add("show");
+}
+
+async function saveBrand(){
+const btn=document.getElementById("saveBrandBtn");btn.disabled=true;btn.textContent="Saving...";
+try{
+const name=document.getElementById("brandName").value.trim();if(!name)throw new Error("Brand name required.");
+let logoUrl=editingBrand?.logo_url||null,logoPath=editingBrand?.logo_path||null;
+const file=document.getElementById("brandImage").files[0];
+if(file){const u=await uploadImage(file,"brands");logoUrl=u.url;logoPath=u.path}
+const row={name,description:document.getElementById("brandDescription").value.trim()||null,logo_url:logoUrl,logo_path:logoPath,is_active:true};
+let error;
+if(editingBrand)({error}=await supabaseClient.from("brands").update(row).eq("id",editingBrand.id));
+else({error}=await supabaseClient.from("brands").insert(row));
+if(error)throw error;
+closeModal("brandModal");await loadBrands();toast(editingBrand?"Brand updated":"Brand added","success");
+}catch(e){toast(e.message,"error")}
+finally{btn.disabled=false;btn.textContent="Save Brand"}
+}
+
+async function deleteBrand(id){
+const b=brands.find(x=>x.id===id);if(!b)return;
+if(products.some(p=>p.brand_id===id)){toast("This brand is used by products. Change those products first.","error");return}
+if(!confirm(`Delete ${b.name}?`))return;
+const {error}=await supabaseClient.from("brands").delete().eq("id",id);
+if(error){toast(error.message,"error");return}
+await loadBrands();toast("Brand deleted","success");
+}
+
+async function loadOrders(){
+const box=document.getElementById("orders");
+const {data,error}=await supabaseClient.from("orders").select("*").order("created_at",{ascending:false});
+if(error){box.innerHTML=`<tr><td colspan="8">${esc(error.message)}</td></tr>`;return}
+orders=data||[];
+box.innerHTML=orders.length?orders.map(o=>`
+<tr>
+<td><strong>#${esc(o.order_number||short(o.id))}</strong></td>
+<td>${esc(o.customer_name||"-")}</td>
+<td>${esc(o.customer_phone||"-")}</td>
+<td>₹${money(o.grand_total)}</td>
+<td><select onchange="orderStatus('${o.id}',this.value)" style="padding:7px">
+${["pending","confirmed","processing","shipped","delivered","cancelled"].map(s=>`<option value="${s}" ${o.order_status===s?"selected":""}>${s}</option>`).join("")}
+</select></td>
+<td><span class="badge">${esc(o.payment_status||"-")}</span></td>
+<td>${date(o.created_at)}</td>
+<td><button class="btn secondary" onclick="viewOrder('${o.id}')">View</button></td>
+</tr>`).join(""):'<tr><td colspan="8" class="empty">No orders.</td></tr>';
+document.getElementById("cOrders").textContent=orders.length;
+}
+
+async function orderStatus(id,status){
+const {error}=await supabaseClient.from("orders").update({order_status:status,updated_at:new Date().toISOString()}).eq("id",id);
+if(error){toast(error.message,"error");return}
+toast("Order status updated","success");await loadOrders();
+}
+
+function viewOrder(id){
+const o=orders.find(x=>x.id===id);if(!o)return;
+document.getElementById("orderDetails").innerHTML=`
+<div class="details">
+<div class="detail"><b>ORDER</b>#${esc(o.order_number||short(o.id))}</div>
+<div class="detail"><b>DATE</b>${date(o.created_at)}</div>
+<div class="detail"><b>CUSTOMER</b>${esc(o.customer_name||"-")}</div>
+<div class="detail"><b>PHONE</b>${esc(o.customer_phone||"-")}</div>
+<div class="detail"><b>EMAIL</b>${esc(o.customer_email||"-")}</div>
+<div class="detail"><b>TOTAL</b>₹${money(o.grand_total)}</div>
+<div class="detail"><b>PAYMENT</b>${esc(o.payment_status||"-")}</div>
+<div class="detail"><b>STATUS</b>${esc(o.order_status||"-")}</div>
+</div>
+<div class="panel" style="margin-top:15px;margin-bottom:0"><strong>Address</strong><div style="margin-top:7px">${esc(o.shipping_address||o.address||"Not provided")}</div></div>`;
+document.getElementById("orderModal").classList.add("show");
+}
+
+async function loadPayments(){
+const box=document.getElementById("payments");
+const {data,error}=await supabaseClient.from("payments").select("*").order("created_at",{ascending:false});
+if(error){box.innerHTML=`<tr><td colspan="7">${esc(error.message)}</td></tr>`;return}
+payments=data||[];
+box.innerHTML=payments.length?payments.map(p=>`
+<tr>
+<td>${esc(p.customer_id||"-")}</td>
+<td>${short(p.order_id)}</td>
+<td>₹${money(p.amount)}</td>
+<td>${esc(p.method||"-")}</td>
+<td><span class="badge">${esc(p.status||"-")}</span></td>
+<td>${esc(p.transaction_reference||"-")}</td>
+<td>${date(p.created_at)}</td>
+</tr>`).join(""):'<tr><td colspan="7" class="empty">No payments.</td></tr>';
+}
+
+async function uploadImage(file,folder){
+if(!file.type.startsWith("image/"))throw new Error("Please select an image.");
+if(file.size>5*1024*1024)throw new Error("Image must be smaller than 5MB.");
+const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+const path=`${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+const {error}=await supabaseClient.storage.from("product-images").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+if(error)throw error;
+const {data}=supabaseClient.storage.from("product-images").getPublicUrl(path);
+return{path,url:data.publicUrl};
+}
+
+function preview(event,id){
+const file=event.target.files[0];if(!file)return;
+if(!file.type.startsWith("image/")){event.target.value="";toast("Please select an image.","error");return}
+if(file.size>5*1024*1024){event.target.value="";toast("Image must be smaller than 5MB.","error");return}
+const reader=new FileReader();
+reader.onload=e=>{const img=document.getElementById(id);img.src=e.target.result;img.style.display="block"};
+reader.readAsDataURL(file);
+}
+
+function hidePreview(id){const img=document.getElementById(id);img.removeAttribute("src");img.style.display="none"}
+
+function dashboard(){
+document.getElementById("cProducts").textContent=products.length;
+document.getElementById("cCategories").textContent=categories.length;
+const low=products.filter(p=>p.is_active!==false&&Number(p.stock||0)<=5);
+document.getElementById("cStock").textContent=low.length;
+document.getElementById("lowStock").innerHTML=low.length?low.slice(0,10).map(p=>`
+<div style="padding:11px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:10px">
+<strong>${esc(p.name)}</strong><span class="stock ${Number(p.stock||0)<=0?"out":"low"}">${Number(p.stock||0)} left</span>
+</div>`).join(""):'<div class="empty">All active products have sufficient stock.</div>';
+}
+
+function tab(id,button){
+document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+document.getElementById(id).classList.add("active");button.classList.add("active");
+if(id==="orders")loadOrders();
+if(id==="payments")loadPayments();
+if(id==="products")renderProducts();
+}
+
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+
+function closeModal(id){document.getElementById(id).classList.remove("show")}
+
+function money(v){return Number(v||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function date(v){if(!v)return"-";const d=new Date(v);if(isNaN(d))return"-";return d.toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function short(v){return String(v||"").slice(-8)}
+function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+
+function toast(message,type=""){
+const box=document.getElementById("toast");box.textContent=message;box.className="toast show "+type;
+clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.className="toast",3500);
+}
+
+supabaseClient.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")showLogin()});
+</script>
+</body>
+</html>
